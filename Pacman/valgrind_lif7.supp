@@ -1,0 +1,41 @@
+{
+   <SDL2:SDL_CreateTextureFromSurface>
+   Memcheck:Leak
+   ...
+   fun:SDL_CreateTextureFromSurface
+}
+
+{
+   <SDL2:SDL_RenderClear>
+   Memcheck:Leak
+   ...
+   fun:SDL_RenderClear
+}
+
+{
+   <SDL2:SDL_CreateRenderer>
+   Memcheck:Leak
+   ...
+   fun:SDL_CreateRenderer
+}
+
+{
+   <SDL2:SDL_CreateWindow>
+   Memcheck:Leak
+   ...
+   fun:SDL_CreateWindow
+}
+
+{
+   <SDL2:SDL_ConvertSurfaceFormat>
+   Memcheck:Leak
+   ...
+   fun:SDL_ConvertSurfaceFormat
+}
+
+{
+   <SDL2:SDL_RenderCopy>
+   Memcheck:Leak
+   ...
+   fun:SDL_RenderCopy
+}
