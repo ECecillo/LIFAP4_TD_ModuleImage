@@ -47,6 +47,14 @@ void Image::loadFromFile (const char* filename, SDL_Renderer * renderer) {
     }
 }
 
+void Image::loadFromCurrentSurface (SDL_Renderer * renderer) {
+    texture = SDL_CreateTextureFromSurface(renderer,surface);
+    if (texture == NULL) {
+        cout << "Error: problem to create the texture from surface " << endl;
+        exit(1);
+    }
+}
+
 void Image::draw (SDL_Renderer * renderer, int x, int y, int w, int h) {
     int ok;
     SDL_Rect r;
@@ -65,6 +73,10 @@ void Image::draw (SDL_Renderer * renderer, int x, int y, int w, int h) {
     assert(ok == 0);
 }
 
+SDL_Texture * Image::getTexture() const {return texture;}
+
+void Image::setSurface(SDL_Surface * surf) {surface = surf;}
+
 // ============= CLASS SDLJEU =============== //
 
 sdlJeu::sdlJeu () : jeu() {
@@ -74,12 +86,17 @@ sdlJeu::sdlJeu () : jeu() {
     }
 
     if (TTF_Init() != 0) {
-        cout << "Erreur lors de l'initialisation de la SDL_ttf : " << SDL_GetError() << endl;SDL_Quit();exit(1);
+        cout << "Erreur lors de l'initialisation de la SDL_ttf : " << TTF_GetError() << endl;SDL_Quit();exit(1);
     }
 
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     if( !(IMG_Init(imgFlags) & imgFlags)) {
         cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << endl;SDL_Quit();exit(1);
+    }
+
+    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+    {
+        cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;SDL_Quit();exit(1);
     }
 
 	int dimx, dimy;
@@ -96,13 +113,31 @@ sdlJeu::sdlJeu () : jeu() {
 
     renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
 
+    // IMAGES
     im_pacman.loadFromFile("data/pacman.png",renderer);
     im_mur.loadFromFile("data/mur.png",renderer);
     im_pastille.loadFromFile("data/pastille.png",renderer);
     im_fantome.loadFromFile("data/fantome.png",renderer);
+
+    // FONTS
+    font = TTF_OpenFont("data/DejaVuSansCondensed.ttf",50);
+    if (font == NULL) {
+            cout << "Failed to load DejaVuSansCondensed.ttf! SDL_TTF Error: " << TTF_GetError() << endl; SDL_Quit(); exit(1);
+	}
+	font_color.r = 50;font_color.g = 50;font_color.b = 255;
+	font_im.setSurface(TTF_RenderText_Solid(font,"Pacman",font_color));
+	font_im.loadFromCurrentSurface(renderer);
+
+    // SONS
+    son = Mix_LoadWAV("data/son.wav");
+	if (son == NULL) {
+            cout << "Failed to load son.wav! SDL_mixer Error: " << Mix_GetError() << endl; SDL_Quit(); exit(1);
+	}
 }
 
 sdlJeu::~sdlJeu () {
+    Mix_Quit();
+    TTF_CloseFont(font);
     TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -132,6 +167,12 @@ void sdlJeu::sdlAff () {
 
 	// Afficher le sprite du Fantome
 	im_fantome.draw(renderer,fan.getX()*TAILLE_SPRITE,fan.getY()*TAILLE_SPRITE,TAILLE_SPRITE,TAILLE_SPRITE);
+
+    // Ecrire un titre par dessus
+    SDL_Rect positionTitre;
+    positionTitre.x = 270;positionTitre.y = 49;positionTitre.w = 100;positionTitre.h = 30;
+    SDL_RenderCopy(renderer,font_im.getTexture(),NULL,&positionTitre);
+
 }
 
 void sdlJeu::sdlBoucle () {
@@ -153,18 +194,19 @@ void sdlJeu::sdlBoucle () {
 		while (SDL_PollEvent(&events)) {
 			if (events.type == SDL_QUIT) quit = true;           // Si l'utilisateur a clique sur la croix de fermeture
 			else if (events.type == SDL_KEYDOWN) {              // Si une touche est enfoncee
+                bool mangePastille = false;
 				switch (events.key.keysym.scancode) {
 				case SDL_SCANCODE_UP:
-					jeu.actionClavier('b');                      // car Y inverse
+					mangePastille = jeu.actionClavier('b');    // car Y inverse
 					break;
 				case SDL_SCANCODE_DOWN:
-					jeu.actionClavier('h');                      // car Y inverse
+					mangePastille = jeu.actionClavier('h');     // car Y inverse
 					break;
 				case SDL_SCANCODE_LEFT:
-					jeu.actionClavier('g');
+					mangePastille = jeu.actionClavier('g');
 					break;
 				case SDL_SCANCODE_RIGHT:
-					jeu.actionClavier('d');
+					mangePastille = jeu.actionClavier('d');
 					break;
                 case SDL_SCANCODE_ESCAPE:
                 case SDL_SCANCODE_Q:
@@ -172,6 +214,7 @@ void sdlJeu::sdlBoucle () {
                     break;
 				default: break;
 				}
+				if (mangePastille) Mix_PlayChannel(-1,son,0);
 			}
 		}
 

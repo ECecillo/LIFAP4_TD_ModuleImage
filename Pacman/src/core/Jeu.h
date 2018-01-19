@@ -36,7 +36,7 @@ public :
     int getNombreDeFantome() const;
 
     void actionsAutomatiques ();
-    void actionClavier(const char touche);
+    bool actionClavier(const char touche); // rend vrai si mange une pastille, faux sinon
 
 };
 

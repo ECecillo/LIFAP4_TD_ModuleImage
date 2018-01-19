@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 #include "Jeu.h"
 
@@ -19,7 +20,10 @@ private:
 public:
     Image () ;
     void loadFromFile (const char* filename, SDL_Renderer * renderer);
+    void loadFromCurrentSurface (SDL_Renderer * renderer);
     void draw (SDL_Renderer * renderer, int x, int y, int w=-1, int h=-1);
+    SDL_Texture * getTexture() const;
+    void setSurface(SDL_Surface * surf);
 };
 
 
@@ -35,7 +39,12 @@ private :
 
     SDL_Window * window;
     SDL_Renderer * renderer;
+
     TTF_Font * font;
+    Image font_im;
+    SDL_Color font_color;
+
+    Mix_Chunk * son;
 
     Image im_pacman;
     Image im_mur;

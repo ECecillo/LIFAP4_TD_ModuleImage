@@ -17,7 +17,7 @@ const Fantome& Jeu::getConstFantome () const { return fan; }
 int Jeu::getNombreDeFantome() const { return 1; }
 
 
-void Jeu::actionClavier (const char touche) {
+bool Jeu::actionClavier (const char touche) {
 	switch(touche) {
 		case 'g' :
 				pac.gauche(ter);
@@ -32,7 +32,11 @@ void Jeu::actionClavier (const char touche) {
 				pac.bas(ter);
 				break;
 	}
-	ter.mangePastille(pac.getX(),pac.getY());
+	if (ter.getXY(pac.getX(),pac.getY())=='.') {
+	    ter.mangePastille(pac.getX(),pac.getY());
+        return true;
+	}
+	return false;
 }
 
 void Jeu::actionsAutomatiques () {
