@@ -14,8 +14,8 @@ MODES = [ "FULLAUTO" , "SEMIAUTO" ]
 MODE = "FULLAUTO"
 #MODE = "SEMIAUTO"
 
-VERBOSE = True
-#VERBOSE = False
+#VERBOSE = True
+VERBOSE = False
 
 ###          FONCTIONNALITES           ###
 def msg(pb, penalite):
@@ -79,6 +79,17 @@ def countInFile(f, word):
 	else:
 		return 0
 
+def replaceInFile (fin,fout,wordin,wordout):
+	if isfile(fin):
+		texte = ''
+		with open(fin,'r',errors='ignore') as fs:
+			texte = fs.read()
+			texte = texte.replace(wordin,wordout)
+			fs.close()
+		with open(fout,'w',errors='ignore') as fs:
+			fs.write(texte)
+			fs.close()
+		
 
 ###           EXECUTION DU SCRIPT          ###
 
@@ -299,7 +310,26 @@ else:
 		print("stderr:")
 		print(make_process.stderr.decode("utf-8"))
 
-#TODO : faire nos propres tests de regression complet avec sortie "error" sur stderr et compter nb error
+if isfile("../mainTestRegression.cpp"):
+	if VERBOSE:
+		print("Test de regression ...")
+	replaceInFile ('src/Image.h','src/ImageRegression.h','private','public')
+	subprocess.run(['cp','../mainTestRegression.cpp','src/mainTestRegression.cpp'])
+	subprocess.run(['g++','-ggdb','-c','src/mainTestRegression.cpp','-I/usr/include/SDL2','-o','obj/mainTestRegression.o'])
+	subprocess.run(['g++','-ggdb','-c','src/Image.cpp','-I/usr/include/SDL2','-o','obj/Image.o'])
+	subprocess.run(['g++','-ggdb','-o','bin/testRegression','obj/mainTestRegression.o','obj/Image.o','obj/Pixel.o','-lSDL2','-lSDL2_ttf','-lSDL2_image'])
+	make_process = subprocess.run(['bin/testRegression'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	if VERBOSE:
+		print("stdout:")
+		print(make_process.stdout.decode("utf-8"))
+		print("stderr:")
+		print(make_process.stderr.decode("utf-8"))
+	errors = make_process.stdout.decode("utf-8")
+	nb_errors = errors.count("ERREUR")
+	if nb_errors>0:
+		msg("Il y a "+str(nb_errors)+" erreurs dans les tests de regression",min(nb_errors*0.1,0.5))
+	if VERBOSE:
+		print("Test de regression ... done")	
 
 print("===> bin/test ... done")
 if VERBOSE:
@@ -318,12 +348,19 @@ if isfile("bin/test"):
 	iend = int(str_stderr.find("bytes",istart))
 	nb_bytes_lost = int(str_stderr[istart+17:iend])
 	if VERBOSE:
-		print("Nombre de bytes perdus = "+str(nb_bytes_lost))
+		print("Nombre de bytes perdus : "+str(nb_bytes_lost))
 	if nb_bytes_lost > 0:
-		msg("Il a "+str(nb_bytes_lost)+" octets perdus", min(nb_bytes_lost*0.001, 0.5))
+		msg("Il a "+str(nb_bytes_lost)+" octets perdus", min(nb_bytes_lost*0.01, 0.5))
 	elif VERBOSE:
 		print("Aucune fuite memoire")
-	#TODO compter les acces invalides en memoire
+	
+	nb_invalid_write = str_stderr.count("Invalid write")
+	if VERBOSE:
+		print("Nombre d'acces invalides : "+str(nb_invalid_write))
+	if nb_invalid_write > 0:
+		msg("Il a "+str(nb_invalid_write)+" acces invalides a la memoire", min(nb_invalid_write*0.1, 0.5))
+	elif VERBOSE:
+		print("Aucun acces invalide")
 else:
 	msg("bin/test n'existe pas, impossible de tester les fuites memoires", 0.5)	
 
@@ -515,4 +552,7 @@ print(RETOUR)
 print("Les etudiants ayant comme numeros : ",end='')
 print(*NUMEROS_ETU, sep=' , ', end=' ')
 print("ont la note "+str(NOTE)+"\n")
+foutput = open('../'+NOM_ARCHIVE+'_feedback.txt','w')
+foutput.write(NOM_ARCHIVE+" : "+str(NOTE)+"\n\n"+RETOUR)
+foutput.close()
 
