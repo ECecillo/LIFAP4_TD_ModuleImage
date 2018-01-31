@@ -44,12 +44,14 @@ private :
     Image font_im;
     SDL_Color font_color;
 
-    Mix_Chunk * son;
+    Mix_Chunk * sound;
+    bool withSound;
 
     Image im_pacman;
     Image im_mur;
     Image im_pastille;
     Image im_fantome;
+
 
 public :
 
