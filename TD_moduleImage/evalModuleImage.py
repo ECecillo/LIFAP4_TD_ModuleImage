@@ -454,7 +454,7 @@ if VERBOSE:
 
 ###  ASSERTIONS  ###
 print("===> assert ...")
-search = ["assert"]
+search = ["assert","throw"]
 files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.cpp", "src/Image.cpp", "src/pixel.cpp",
          "src/Pixel.cpp"]
 n = 0
