@@ -96,8 +96,12 @@ sdlJeu::sdlJeu () : jeu() {
 
     if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
     {
-        cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;SDL_Quit();exit(1);
+        cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;
+        cout << "No sound !!!" << endl;
+        //SDL_Quit();exit(1);
+        withSound = false;
     }
+    else withSound = true;
 
 	int dimx, dimy;
 	dimx = jeu.getConstTerrain().getDimX();
@@ -129,14 +133,17 @@ sdlJeu::sdlJeu () : jeu() {
 	font_im.loadFromCurrentSurface(renderer);
 
     // SONS
-    son = Mix_LoadWAV("data/son.wav");
-	if (son == NULL) {
-            cout << "Failed to load son.wav! SDL_mixer Error: " << Mix_GetError() << endl; SDL_Quit(); exit(1);
-	}
+    if (withSound)
+    {
+        sound = Mix_LoadWAV("data/son.wav");
+        if (sound == NULL) {
+                cout << "Failed to load son.wav! SDL_mixer Error: " << Mix_GetError() << endl; SDL_Quit(); exit(1);
+        }
+    }
 }
 
 sdlJeu::~sdlJeu () {
-    Mix_Quit();
+    if (withSound) Mix_Quit();
     TTF_CloseFont(font);
     TTF_Quit();
     SDL_DestroyRenderer(renderer);
@@ -214,7 +221,8 @@ void sdlJeu::sdlBoucle () {
                     break;
 				default: break;
 				}
-				if (mangePastille) Mix_PlayChannel(-1,son,0);
+				if ((withSound) && (mangePastille))
+                    Mix_PlayChannel(-1,sound,0);
 			}
 		}
 
