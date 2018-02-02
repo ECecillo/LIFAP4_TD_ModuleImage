@@ -330,7 +330,7 @@ if VERBOSE:
 
 print("===> valgrind sur bin/test ...")
 if isfile("bin/test"):
-    make_process = subprocess.run(['valgrind', "bin/test"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    make_process = subprocess.run(['valgrind','--tool=memcheck','--leak-check=summary','bin/test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
         print("stdout:")
         print(make_process.stdout.decode("utf-8"))
