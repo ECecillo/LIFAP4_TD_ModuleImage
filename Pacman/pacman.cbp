@@ -13,7 +13,7 @@
 			<Clean command="$make -f $makefile clean" />
 			<DistClean command="$make -f $makefile clean" />
 			<AskRebuildNeeded command="$make -q -f $makefile $target" />
-			<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+			<SilentBuild command="$make -f $makefile &gt; $(CMD_NULL)" />
 		</MakeCommands>
 		<Build>
 			<Target title="DebugTXT">
@@ -56,6 +56,26 @@
 					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
 				</MakeCommands>
 			</Target>
+			<Target title="DebugSFML">
+				<Option output="bin/pacman_sfml" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-lncurses -lSDL" />
+				</Linker>
+				<MakeCommands>
+					<Build command="$make -f $makefile" />
+					<CompileFile command="$make -f $makefile" />
+					<Clean command="$make -f $makefile clean" />
+					<DistClean command="$make -f $makefile clean" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -79,6 +99,9 @@
 		<Unit filename="src/sdl2/main_sdl.cpp" />
 		<Unit filename="src/sdl2/sdlJeu.cpp" />
 		<Unit filename="src/sdl2/sdlJeu.h" />
+		<Unit filename="src/sfml/main_sfml.cpp" />
+		<Unit filename="src/sfml/sfmlJeu.cpp" />
+		<Unit filename="src/sfml/sfmlJeu.h" />
 		<Unit filename="src/txt/main_txt.cpp" />
 		<Unit filename="src/txt/txtJeu.cpp" />
 		<Unit filename="src/txt/txtJeu.h" />
