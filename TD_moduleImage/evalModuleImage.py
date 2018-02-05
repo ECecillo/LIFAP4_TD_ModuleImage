@@ -339,7 +339,12 @@ if isfile("bin/test"):
     str_stderr = make_process.stderr.decode("utf-8")
     istart = int(str_stderr.find("definitely lost: "))
     iend = int(str_stderr.find("bytes", istart))
-    nb_bytes_lost = int(str_stderr[istart + 17:iend])
+	nb_bytes_lost = 0
+    if istart==-1 and iend==-1:
+        if str_stderr.find("All heap blocks were fread")!=-1:
+            msg("Fuite memoire sur la pile", 0.5)
+    else:
+        nb_bytes_lost = int(str_stderr[istart + 17:iend])
     if VERBOSE:
         print("Nombre de bytes perdus : " + str(nb_bytes_lost))
     if nb_bytes_lost > 0:
