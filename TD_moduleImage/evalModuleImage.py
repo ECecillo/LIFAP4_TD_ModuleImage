@@ -330,7 +330,8 @@ if VERBOSE:
 
 print("===> valgrind sur bin/test ...")
 if isfile("bin/test"):
-    make_process = subprocess.run(['valgrind','--tool=memcheck','--leak-check=summary','bin/test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    make_process = subprocess.run(['valgrind', '--tool=memcheck', '--leak-check=summary', 'bin/test'],
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
         print("stdout:")
         print(make_process.stdout.decode("utf-8"))
@@ -339,9 +340,9 @@ if isfile("bin/test"):
     str_stderr = make_process.stderr.decode("utf-8")
     istart = int(str_stderr.find("definitely lost: "))
     iend = int(str_stderr.find("bytes", istart))
-	nb_bytes_lost = 0
-    if istart==-1 and iend==-1:
-        if str_stderr.find("All heap blocks were fread")!=-1:
+    nb_bytes_lost = 0
+    if istart == -1 and iend == -1:
+        if str_stderr.find("All heap blocks were fread") != -1:
             msg("Fuite memoire sur la pile", 0.5)
     else:
         nb_bytes_lost = int(str_stderr[istart + 17:iend])
@@ -382,7 +383,7 @@ else:
         ok = input('zoom/dezoom ok (o/n) ? ')
         if ok == 'n':
             msg("zoom/dezoom non fonctionnel", 0.25)
-        # TODO : else: automatiser la verif de bin/affichage
+            # TODO : else: automatiser la verif de bin/affichage
 
 print("===> bin/affichage ... done")
 if VERBOSE:
@@ -420,18 +421,30 @@ if doxy != "":
     make_process = subprocess.run(['doxygen', doxy], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if not isfile("doc/html/index.html"):
         msg("Doxygen n'a pas genere doc/html/index.html, mauvais chemin dans OUTPUT_DIRECTORY et/ou INPUT?", 1)
-    if not isfile("doc/html/class_image.html"):
+    v1 = isfile("doc/html/class_image.html")
+    v2 = isfile("doc/html/classImage.html")
+    if not v1 and not v2:
         msg("Doxygen n'a pas genere de doc pour la classe Image", 0.5)
     else:
-        sz = filesize("doc/html/class_image.html", 'latin-1')
+        sz = 0
+        if v1:
+            sz = filesize("doc/html/class_image.html", 'latin-1')
+        if v2:
+            sz = filesize("doc/html/classImage.html", 'latin-1')
         if VERBOSE:
             print("taille de la page de la classe Image : " + str(sz) + " octets")
         if sz < 15000:
             msg("Documentation de la classe Image insuffisante", 0.25)
-    if not isfile("doc/html/class_pixel.html"):
+    v1 = isfile("doc/html/class_pixel.html")
+    v2 = isfile("doc/html/classPixel.html")
+    if not v1 and not v2:
         msg("Doxygen n'a pas genere de doc pour la classe Pixel", 0.5)
     else:
-        sz = filesize("doc/html/class_pixel.html", 'latin-1')
+        sz = 0
+        if v1:
+            sz = filesize("doc/html/class_pixel.html", 'latin-1')
+        if v2:
+            sz = filesize("doc/html/classPixel.html", 'latin-1')
         if VERBOSE:
             print("taille de la page de la classe Pixel : " + str(sz) + " octets")
         if sz < 10000:
@@ -459,7 +472,7 @@ if VERBOSE:
 
 ###  ASSERTIONS  ###
 print("===> assert ...")
-search = ["assert","throw"]
+search = ["assert", "throw"]
 files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.cpp", "src/Image.cpp", "src/pixel.cpp",
          "src/Pixel.cpp"]
 n = 0
