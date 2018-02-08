@@ -11,7 +11,7 @@ using namespace std;
 ///////////////////////// FANTOME ITEM  ///
 FantomeGraphicsItem::FantomeGraphicsItem(int fanId, int sprite_size)
     : fantomeId(fanId),
-    m_pix_fan( QApplication::applicationDirPath() + "/../../Pacman/data/fantome.png")
+    m_pix_fan( QApplication::applicationDirPath() + "/data/fantome.png")
 {
     m_pix_fan = m_pix_fan.scaled( sprite_size, sprite_size );
 }
@@ -42,7 +42,7 @@ void FantomeGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsIte
 
 ///////////////////////// PACMAN ITEM  ///
 PacmanGraphicsItem::PacmanGraphicsItem(int sprite_size) :
-    m_pix_pac( QApplication::applicationDirPath() + "/../../Pacman/data/pacman.png")
+    m_pix_pac( QApplication::applicationDirPath() + "/data/pacman.png")
 {
     m_pix_pac = m_pix_pac.scaled( sprite_size, sprite_size );
 }

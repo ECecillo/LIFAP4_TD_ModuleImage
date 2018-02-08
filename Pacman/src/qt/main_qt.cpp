@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     QAction *actionQuitter = new QAction("&Quitter", &qmw);
     menuFichier->addAction(actionQuitter);
     actionQuitter->setShortcut(QKeySequence("Ctrl+Q"));
-    actionQuitter->setIcon(QIcon(QApplication::applicationDirPath() + "/../../Pacman/data/quitter.png"));
+    actionQuitter->setIcon(QIcon(QApplication::applicationDirPath() + "/data/quitter.png"));
 
     QToolBar *toolBarFichier  = qmw.addToolBar("Fichier");
     toolBarFichier->addAction(actionQuitter);

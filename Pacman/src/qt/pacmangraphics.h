@@ -41,7 +41,7 @@ class PacmanGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit PacmanGraphicsView(QWidget *parent = Q_NULLPTR);
+    explicit PacmanGraphicsView(QWidget *parent = NULL);
 
     void drawBackground(QPainter *painter, const QRectF &rect) override;
 

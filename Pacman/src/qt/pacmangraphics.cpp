@@ -67,8 +67,8 @@ void PacmanGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 
 PacmanGraphicsView::PacmanGraphicsView(QWidget *parent) :
     QGraphicsView(parent),
-    m_pix_mur( QApplication::applicationDirPath() + "/../../Pacman/data/mur.png"),
-    m_pix_pastille( QApplication::applicationDirPath() + "/../../Pacman/data/pastille.png")
+    m_pix_mur( QApplication::applicationDirPath() + "/data/mur.png"),
+    m_pix_pastille( QApplication::applicationDirPath() + "/data/pastille.png")
 {
     setScene(&m_pacScene);
 

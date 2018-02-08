@@ -1,4 +1,5 @@
 TEMPLATE = app
+CONFIG += c++11
 SOURCES  = src/qt/main_qt.cpp \
 			src/core/Fantome.cpp \
 			src/core/Jeu.cpp \
