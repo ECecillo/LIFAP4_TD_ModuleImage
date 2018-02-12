@@ -21,10 +21,10 @@ def msg(pb, penalite):
     global RETOUR
     txt = "PROBLEME : " + pb + ". J'enleve " + str(penalite) + " points."
     print(txt)
-    NOTE = NOTE - penalite
+    NOTE = round(NOTE - penalite, 2)
     RETOUR = RETOUR + "\n" + txt
-    if NOTE < 0:
-        print("Note < 0 ===> pas la peine d'aller plus loin ...")
+    if NOTE <= 0:
+        print("Note <= 0 ===> pas la peine d'aller plus loin ...")
         sys.exit(0)
 
 
@@ -34,6 +34,26 @@ def isdir(thefile):
 
 def isfile(thefile):
     return os.path.isfile(thefile)
+
+
+def listfiles(a):
+    if isdir(a):
+        l = []
+        files = glob.glob(a + "/*")
+        for f in files:
+            l.extend(listfiles(f))
+        return l
+    elif isfile(a):
+        nom_complet = a.split("/")[-1]
+        chemin = "/".join(a.split("/")[0:-1])
+        nom = nom_complet.split(".")[0]
+        if "." in nom_complet:
+            ext = ".".join(nom_complet.split(".")[1:])
+        else:
+            ext = ""
+        return [{"f": a, "nom": nom, "ext": ext, "nc": nom_complet, "ch": chemin}]
+    else:
+        return []
 
 
 def rmfiles(thedir):
@@ -89,10 +109,36 @@ def replaceInFile(fin, fout, wordin, wordout):
             fs.close()
 
 
+def isFiledatesOk(filedates, filemodif):
+    ok = True
+    for f,lm in filedates.items():
+        if isfile(f):
+            lastModif = os.stat(f).st_mtime_ns
+            changed = lastModif != lm
+            filedates[f] = lastModif
+            if f in filemodif:
+                ok = ok and (filemodif[f] == changed)
+    return ok
+
+def isDepOk(f, filedates, filemodif):
+    global VERBOSE
+    if isfile(f):
+        os.utime(f)
+    make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    ok = isFiledatesOk(filedates, filemodif)
+    if VERBOSE:
+        print('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
+        print("stdout:")
+        print(make_process.stdout.decode("utf-8"))
+    return ok
+
+
 ###           EXECUTION DU SCRIPT          ###
 
 ###  INIT  ###
 os.system('clear')
+print("\n\n--------------------EXECUTION DU SCRIPT-----------------------")
+print("--------------------------------------------------------------\n\n")
 NOTE = 5
 RETOUR = ""
 
@@ -105,27 +151,44 @@ elif VERBOSE:
     print("Verification Linux OK")
 
 version = sys.version_info
-if version[0] != 3:
-    print("ERREUR : vous devez executer ce script avec Python 3 !")
+if version[0] != 3 or (version[0] == 3 and version[1] < 5): #minimum 3.5 pour subprocess.run() et glob recursif
+    print("ERREUR : vous devez executer ce script avec Python 3 (3.5 minimum) !")
     sys.exit(0)
 elif VERBOSE:
     print("Python version = " + sys.version)
-    print("Verification Python 3 OK")
+    print("Verification Python 3.5 minimum OK")
 
 ###  VERIFICATION PARAMETRE DU SCRIPT = NOM ARCHIVE  ###
 if len(sys.argv) != 2:
     print("ERREUR : lancez le script avec l'archive en parametre: " + sys.argv[0] + " NUM_ETU1_NUM_ETU2.tgz")
     sys.exit(0)
 
+### IDENTIFICATION DES ETUDIANTS ET NOM D'ARCHIVE - PRISE EN COMPTE QUE L'ARCHIVE PEUT PROVENIR DE TOMUSS ###
 FILENAME = sys.argv[1]
-NOM_ARCHIVE = FILENAME.split(".")[0]
-NUMEROS_ETU = NOM_ARCHIVE.split("_")
 if VERBOSE:
     print("FILENAME = " + FILENAME)
+    print("===> note initiale = " + str(NOTE))
+NUMEROS_ETU = []
+NOM_ARCHIVE_ATTENDU = ""
+for mot in FILENAME.replace("p", "1").split(".")[0].split("_"):
+    if mot.isdigit() and len(mot) == 8:
+        NUMEROS_ETU.append(mot)
+        if len(NUMEROS_ETU) > 1:
+            NOM_ARCHIVE_ATTENDU += "_"
+        NOM_ARCHIVE_ATTENDU += mot
+if len(NUMEROS_ETU) == 0:
+    print("ERREUR : aucun numéro d'étudiant détceté dans: " + FILENAME)
+    sys.exit(0)
+if not FILENAME.replace("p", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
+    msg("L'archive  " + FILENAME + "  ne suit pas le format NUM_ETU1_NUM_ETU2_NUM_ETU3.tgz", 0.5)
+f = FILENAME
+if "#" in f:
+    f = f.split("#")[1]
+NOM_ARCHIVE = f[f.find(NUMEROS_ETU[0][1:]) - 1] + NUMEROS_ETU[0][1:] + f.split(".")[0].split(NUMEROS_ETU[0][1:])[1]
+if VERBOSE:
     print("NOM_ARCHIVE = " + NOM_ARCHIVE)
     print("Numeros des etudiants =", end=' ')
-    print(*NUMEROS_ETU, sep=' , ')
-    print("===> note initiale = " + str(NOTE))
+    print(*NUMEROS_ETU, sep=', ')
 
 ###  EXTRACTION DE L'ARCHIVE  ###
 print("===> decompression de l'archive ...")
@@ -153,6 +216,67 @@ if not isdir("doc"):
 if not isdir("data"):
     msg("Dossier data inexistant", 0.5)
 print("===> verification de l'arborescence ... done")
+if VERBOSE:
+    print("==> note = " + str(NOTE))
+
+### VERIFICATION DES FICHIERS PRESENTS/ABSENTS ###
+FICHIERSIND = { #Fichiers attendus et indispensables
+            "Pixel.h" : {"nom": "Pixel", "ext": "h", "loc": "src"},
+            "Pixel.cpp" : {"nom": "Pixel", "ext": "cpp", "loc": "src"},
+            "Image.h" : {"nom": "Image", "ext": "h", "loc": "src"},
+            "Image.cpp" : {"nom": "Image", "ext": "cpp", "loc": "src"},
+            "mainTest.cpp" : {"nom": "mainTest", "ext": "cpp", "loc": "src"}
+        }
+FICHIERSNONIND = { #Fichiers attendus mais non indispensables (fichiers générés ou dont l'absence est traitée plus loin)
+            "mainExemple.cpp" : {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
+            "mainAffichage.cpp" : {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
+            "test" : {"nom": "test", "ext": "", "loc": "bin"},
+            "exemple" : {"nom": "exemple", "ext": "", "loc": "bin"},
+            "affichage" : {"nom": "affichage", "ext": "", "loc": "bin"},
+            "image1.ppm" : {"nom": "image1", "ext": "ppm", "loc": "data"},
+            "image2.ppm" : {"nom": "image2", "ext": "ppm", "loc": "data"},
+            "image.doxy" : {"nom": "image", "ext": "doxy", "loc": "doc"}
+        }
+FICHIERSPRESENTS = listfiles(".")
+for nc,prop in FICHIERSIND.items():
+    present = False
+    for f in FICHIERSPRESENTS:
+        if f["nc"] == nc:
+            present = True
+    if not present:
+        msg("Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent être présents", 5)
+        break
+for f in FICHIERSPRESENTS:
+    if "/html" in f["ch"]:
+        continue
+    if "dll" in f["ext"].lower() or "mingw" in f["f"].lower():
+        continue
+    if "sdl" in f["f"].lower():
+        continue
+    if f["ext"] in ["cbp", "layout"]:
+        continue
+    if f["ext"] in ["o", "depend", "d"]:
+        continue
+    if f["nc"] in ["documentation.h"]:
+        continue
+    if f["ext"] in ["ttf", "woff", "wav", "mp3"]:
+        continue
+    if f["ext"] in ["supp"]:
+        continue
+    if f["nom"].lower() == "makefile":
+        continue
+    if f["nom"].lower() == "readme":
+        continue
+    if f["nc"] in FICHIERSIND:
+        continue
+    if f["nc"] in FICHIERSNONIND:
+        continue
+    if "dia" == f["ext"] or "xmi" == f["ext"] or (("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
+        if not "doc" in f["ch"]:
+            msg("Le diagramme des classes " + f["nc"] + " doit être dans le dossier doc/", 0.1)
+        continue
+    msg("Le fichier " + f["nc"] + " ne doit pas être là", 0.1)
+print("===> verification des fichiers présents... done")
 if VERBOSE:
     print("==> note = " + str(NOTE))
 
@@ -185,18 +309,23 @@ if VERBOSE:
     print("stderr:")
     print(make_process.stderr.decode("utf-8"))
 
-if isfile("bin/exemple"):
-    msg("make clean ne supprime pas bin/exemple", 0.1)
-if isfile("bin/test"):
-    msg("make clean ne supprime pas bin/test", 0.1)
-if isfile("bin/affichage"):
-    msg("make clean ne supprime pas bin/affichage", 0.1)
+if isfile("bin/exemple") or isfile("./exemple"):
+    msg("make clean ne supprime pas l'exécutable exemple", 0.1)
+if isfile("bin/test") or isfile("./test"):
+    msg("make clean ne supprime pas l'exécutable test", 0.1)
+if isfile("bin/affichage") or isfile("./affichage"):
+    msg("make clean ne supprime pas l'exécutable affichage", 0.1)
 
-if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
+#if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
+if len(glob.glob("**/*.o", recursive=True)) != 0:
     msg("make clean ne supprime pas les fichiers objets", 0.5)
     print("Fichiers objets non supprimes:", end=' ')
-    print(*glob.glob("obj/*.o"), sep=' , ')
-    print(*glob.glob("*.o"), sep=' , ')
+    print(*glob.glob("**/*.o", recursive=True), sep=' , ')
+
+for f in glob.glob("**/*.o", recursive=True):
+    os.remove(f)
+for f in glob.glob('./exemple') + glob.glob('bin/exemple') + glob.glob('./test') + glob.glob('bin/test') + glob.glob('./affichage') + glob.glob('bin/affichage'):
+    os.remove(f)
 
 print("===> make clean  ... done")
 if VERBOSE:
@@ -223,10 +352,23 @@ if error > 0:
 elif VERBOSE:
     print("Pas d'erreur a la compilation")
 
-if len(glob.glob("obj/*.o")) != 5:
+if len(glob.glob("**/*.o", recursive=True)) != 5:
     print("Attention : mauvais nombre de fichiers objets")
-if len(glob.glob("*.o")) != 0 or len(glob.glob("src/*.o")) != 0:
+if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
     msg("Fichiers objets dans le mauvais repertoire", 0.5)
+
+makedepok = True
+filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
+isFiledatesOk(filedates, {})
+makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False, 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Image.h', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False, 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Pixel.h', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False, 'bin/test': False}) and makedepok
+if not makedepok:
+    msg('Toutes les dépendances ne sont pas prises en compte dans le Makefile', 0.5)
+
 
 if VERBOSE:
     print("==> note = " + str(NOTE))
