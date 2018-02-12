@@ -5,15 +5,15 @@ from sys import platform
 import tarfile
 import subprocess
 import glob
+import re
 
 ###          OPTION D'EVALUATION       ###
 MODES = ["FULLAUTO", "SEMIAUTO"]
 MODE = "FULLAUTO"
 # MODE = "SEMIAUTO"
 
-# VERBOSE = True
-VERBOSE = False
-
+VERBOSE = True
+# VERBOSE = False
 
 ###          FONCTIONNALITES           ###
 def msg(pb, penalite):
@@ -96,15 +96,21 @@ os.system('clear')
 NOTE = 5
 RETOUR = ""
 
-###  VERIFICATION OS = LINUX  ###
-if VERBOSE:
-    print("Python version = " + sys.version)
-    print("Plateforme = " + platform)
+###  VERIFICATION OS LINUX + VERSION PYTHON ###
 if platform != "linux" and platform != "linux2":
     print("ERREUR : vous devez executer ce script sous Linux !")
     sys.exit(0)
 elif VERBOSE:
+    print("Plateforme = " + platform)
     print("Verification Linux OK")
+
+version = sys.version_info
+if version[0] != 3:
+    print("ERREUR : vous devez executer ce script avec Python 3 !")
+    sys.exit(0)
+elif VERBOSE:
+    print("Python version = " + sys.version)
+    print("Verification Python 3 OK")
 
 ###  VERIFICATION PARAMETRE DU SCRIPT = NOM ARCHIVE  ###
 if len(sys.argv) != 2:
@@ -472,7 +478,7 @@ if VERBOSE:
 
 ###  ASSERTIONS  ###
 print("===> assert ...")
-search = ["assert", "throw"]
+search = ["assert(", "assert (", "throw"]
 files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.cpp", "src/Image.cpp", "src/pixel.cpp",
          "src/Pixel.cpp"]
 n = 0
@@ -496,6 +502,8 @@ if MODE == "FULLAUTO":
         if isfile(f):
             fi = open(f, 'r', encoding="latin-1")
             texte = fi.read()
+            texte = re.sub("(?<=\/\*)(.*?)(?=\*\/)", "", texte, 0, re.DOTALL)
+            texte = re.sub("//.*", "", texte)
             if texte.count("unsigned char") == 0:
                 msg("Mauvais type des donnees membres de Pixel", 0.25)
             fi.close()
@@ -505,8 +513,10 @@ if MODE == "FULLAUTO":
         if isfile(f):
             fi = open(f, 'r', encoding="latin-1")
             texte = fi.read()
+            texte = re.sub("(?<=\/\*)(.*?)(?=\*\/)", "", texte, 0, re.DOTALL)
+            texte = re.sub("//.*", "", texte)
 
-            if texte.count("include") > 4:
+            if texte.count("#include") > 4:
                 msg("Des include inutiles dans Image.h", 0.25)
 
             iend = texte.find("getPix")
