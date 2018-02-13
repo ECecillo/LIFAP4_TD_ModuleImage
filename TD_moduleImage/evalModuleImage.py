@@ -177,7 +177,7 @@ for mot in FILENAME.replace("p", "1").split(".")[0].split("_"):
             NOM_ARCHIVE_ATTENDU += "_"
         NOM_ARCHIVE_ATTENDU += mot
 if len(NUMEROS_ETU) == 0:
-    print("ERREUR : aucun numéro d'étudiant détceté dans: " + FILENAME)
+    print("ERREUR : aucun numero d'etudiant detecte dans: " + FILENAME)
     sys.exit(0)
 if not FILENAME.replace("p", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
     msg("L'archive  " + FILENAME + "  ne suit pas le format NUM_ETU1_NUM_ETU2_NUM_ETU3.tgz", 0.5)
@@ -227,7 +227,7 @@ FICHIERSIND = { #Fichiers attendus et indispensables
             "Image.cpp" : {"nom": "Image", "ext": "cpp", "loc": "src"},
             "mainTest.cpp" : {"nom": "mainTest", "ext": "cpp", "loc": "src"}
         }
-FICHIERSNONIND = { #Fichiers attendus mais non indispensables (fichiers générés ou dont l'absence est traitée plus loin)
+FICHIERSNONIND = { #Fichiers attendus mais non indispensables (fichiers generes ou dont l'absence est traitee plus loin)
             "mainExemple.cpp" : {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
             "mainAffichage.cpp" : {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
             "test" : {"nom": "test", "ext": "", "loc": "bin"},
@@ -244,7 +244,7 @@ for nc,prop in FICHIERSIND.items():
         if f["nc"] == nc:
             present = True
     if not present:
-        msg("Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent être présents", 5)
+        msg("Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents", 5)
         break
 for f in FICHIERSPRESENTS:
     if "/html" in f["ch"]:
@@ -273,10 +273,10 @@ for f in FICHIERSPRESENTS:
         continue
     if "dia" == f["ext"] or "xmi" == f["ext"] or (("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
         if not "doc" in f["ch"]:
-            msg("Le diagramme des classes " + f["nc"] + " doit être dans le dossier doc/", 0.1)
+            msg("Le diagramme des classes " + f["nc"] + " doit etre dans le dossier doc/", 0.1)
         continue
-    msg("Le fichier " + f["nc"] + " ne doit pas être là", 0.1)
-print("===> verification des fichiers présents... done")
+    msg("Le fichier " + f["nc"] + " ne doit pas etre la", 0.1)
+print("===> verification des fichiers presents... done")
 if VERBOSE:
     print("==> note = " + str(NOTE))
 
@@ -310,11 +310,11 @@ if VERBOSE:
     print(make_process.stderr.decode("utf-8"))
 
 if isfile("bin/exemple") or isfile("./exemple"):
-    msg("make clean ne supprime pas l'exécutable exemple", 0.1)
+    msg("make clean ne supprime pas l'executable exemple", 0.1)
 if isfile("bin/test") or isfile("./test"):
-    msg("make clean ne supprime pas l'exécutable test", 0.1)
+    msg("make clean ne supprime pas l'executable test", 0.1)
 if isfile("bin/affichage") or isfile("./affichage"):
-    msg("make clean ne supprime pas l'exécutable affichage", 0.1)
+    msg("make clean ne supprime pas l'executable affichage", 0.1)
 
 #if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
 if len(glob.glob("**/*.o", recursive=True)) != 0:
@@ -367,7 +367,7 @@ makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/P
 makedepok = isDepOk('src/Pixel.h', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) and makedepok
 makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False, 'bin/test': False}) and makedepok
 if not makedepok:
-    msg('Toutes les dépendances ne sont pas prises en compte dans le Makefile', 0.5)
+    msg('Toutes les dependances ne sont pas prises en compte dans le Makefile', 0.5)
 
 
 if VERBOSE:
