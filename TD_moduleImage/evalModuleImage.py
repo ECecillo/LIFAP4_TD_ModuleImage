@@ -69,7 +69,19 @@ def rmfiles(thedir):
 
 def filesize(read, enco="utf-8"):
     if read != "":
-        fs = open(read, 'r', encoding=enco)
+        en = enco
+        #en = "latin1"
+        try:
+            fs = open(read, 'r', encoding=en)
+            texte = fs.read()
+        except UnicodeDecodeError:
+            en = "latin1"
+        except Error as exc_ret:
+            print(exc_ret)
+            sys.exit(-1)
+        finally:
+            fs.close()
+        fs = open(read, 'r', encoding=en)
         texte = fs.read()
         longueur = len(texte)
         fs.close()
@@ -129,7 +141,7 @@ def isDepOk(f, filedates, filemodif):
     if VERBOSE:
         print('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
         print("stdout:")
-        print(make_process.stdout.decode("utf-8"))
+        print(make_process.stdout.decode("utf-8", "ignore"))
     return ok
 
 
@@ -246,8 +258,12 @@ for nc,prop in FICHIERSIND.items():
     if not present:
         msg("Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents", 5)
         break
+doclatex = False
 for f in FICHIERSPRESENTS:
     if "/html" in f["ch"]:
+        continue
+    if "/latex" in f["ch"]:
+        doclatex = True
         continue
     if "dll" in f["ext"].lower() or "mingw" in f["f"].lower():
         continue
@@ -276,6 +292,8 @@ for f in FICHIERSPRESENTS:
             msg("Le diagramme des classes " + f["nc"] + " doit etre dans le dossier doc/", 0.1)
         continue
     msg("Le fichier " + f["nc"] + " ne doit pas etre la", 0.1)
+if doclatex:
+    msg("La documentation n'est pas demandee en latex", 0.1)
 print("===> verification des fichiers presents... done")
 if VERBOSE:
     print("==> note = " + str(NOTE))
@@ -305,9 +323,9 @@ if isfile(MAKEFILE):
 make_process = subprocess.run(['make', 'clean'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 if VERBOSE:
     print("stdout:")
-    print(make_process.stdout.decode("utf-8"))
+    print(make_process.stdout.decode("utf-8", "ignore"))
     print("stderr:")
-    print(make_process.stderr.decode("utf-8"))
+    print(make_process.stderr.decode("utf-8", "ignore"))
 
 if isfile("bin/exemple") or isfile("./exemple"):
     msg("make clean ne supprime pas l'executable exemple", 0.1)
@@ -338,9 +356,9 @@ make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subproces
 warning = str(make_process.stderr).count("warning:")
 if VERBOSE:
     print("stdout:")
-    print(make_process.stdout.decode("utf-8"))
+    print(make_process.stdout.decode("utf-8", "ignore"))
     print("stderr:")
-    print(make_process.stderr.decode("utf-8"))
+    print(make_process.stderr.decode("utf-8", "ignore"))
 if warning > 0:
     msg("Il a " + str(warning) + " warnings a la compilation", min(warning * 0.1, 0.5))
 elif VERBOSE:
@@ -387,12 +405,13 @@ if VERBOSE and isfile("data/image2.ppm"):
     print("image2.ppm existe, suppression")
     os.remove("data/image2.ppm")
 
-make_process = subprocess.run(['bin/exemple'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-if VERBOSE:
-    print("stdout:")
-    print(make_process.stdout.decode("utf-8"))
-    print("stderr:")
-    print(make_process.stderr.decode("utf-8"))
+if isfile("bin/exemple"):
+    make_process = subprocess.run(['bin/exemple'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if VERBOSE:
+        print("stdout:")
+        print(make_process.stdout.decode("utf-8", "ignore"))
+        print("stderr:")
+        print(make_process.stderr.decode("utf-8", "ignore"))
 
 if not isfile("data/image1.ppm"):
     msg("image1.ppm non generee (ou pas dans data)", 0.5)
@@ -444,9 +463,9 @@ else:
     make_process = subprocess.run(['bin/test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
         print("stdout:")
-        print(make_process.stdout.decode("utf-8"))
+        print(make_process.stdout.decode("utf-8", "ignore"))
         print("stderr:")
-        print(make_process.stderr.decode("utf-8"))
+        print(make_process.stderr.decode("utf-8", "ignore"))
 
 if isfile("../mainTestRegression.cpp"):
     if VERBOSE:
@@ -459,18 +478,21 @@ if isfile("../mainTestRegression.cpp"):
     subprocess.run(
         ['g++', '-ggdb', '-o', 'bin/testRegression', 'obj/mainTestRegression.o', 'obj/Image.o', 'obj/Pixel.o', '-lSDL2',
          '-lSDL2_ttf', '-lSDL2_image'])
-    make_process = subprocess.run(['bin/testRegression'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if VERBOSE:
-        print("stdout:")
-        print(make_process.stdout.decode("utf-8"))
-        print("stderr:")
-        print(make_process.stderr.decode("utf-8"))
-    errors = make_process.stdout.decode("utf-8")
-    nb_errors = errors.count("ERREUR")
-    if nb_errors > 0:
-        msg("Il y a " + str(nb_errors) + " erreurs dans les tests de regression", min(nb_errors * 0.1, 0.5))
-    if VERBOSE:
-        print("Test de regression ... done")
+    if not isfile("bin/testRegression"):
+        msg("Le test de regression prof ne peut pas compiler (voir plus haut les erreurs de compilation)", 1)
+    else:
+        make_process = subprocess.run(['bin/testRegression'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if VERBOSE:
+            print("stdout:")
+            print(make_process.stdout.decode("utf-8", "ignore"))
+            print("stderr:")
+            print(make_process.stderr.decode("utf-8", "ignore"))
+        errors = make_process.stdout.decode("utf-8", "ignore")
+        nb_errors = errors.count("ERREUR")
+        if nb_errors > 0:
+            msg("Il y a " + str(nb_errors) + " erreurs dans les tests de regression", min(nb_errors * 0.1, 0.5))
+        if VERBOSE:
+            print("Test de regression ... done")
 
 print("===> bin/test ... done")
 if VERBOSE:
@@ -482,10 +504,10 @@ if isfile("bin/test"):
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
         print("stdout:")
-        print(make_process.stdout.decode("utf-8"))
+        print(make_process.stdout.decode("utf-8", "ignore"))
         print("stderr:")
-        print(make_process.stderr.decode("utf-8"))
-    str_stderr = make_process.stderr.decode("utf-8")
+        print(make_process.stderr.decode("utf-8", "ignore"))
+    str_stderr = make_process.stderr.decode("utf-8", "ignore")
     istart = int(str_stderr.find("definitely lost: "))
     iend = int(str_stderr.find("bytes", istart))
     nb_bytes_lost = 0
@@ -522,9 +544,9 @@ else:
         make_process = subprocess.run(['bin/affichage'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if VERBOSE:
             print("stdout:")
-            print(make_process.stdout.decode("utf-8"))
+            print(make_process.stdout.decode("utf-8", "ignore"))
             print("stderr:")
-            print(make_process.stderr.decode("utf-8"))
+            print(make_process.stderr.decode("utf-8", "ignore"))
         ok = input('affichage image ok (o/n) ? ')
         if ok == 'n':
             msg("bin/affichage non fonctionnel", 0.5)
