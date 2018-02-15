@@ -561,7 +561,7 @@ if VERBOSE:
 
 ###  README  ###
 print("===> readme ...")
-readmes = ["readme.txt", "Readme.txt", "README.txt"]
+readmes = ["readme.txt", "Readme.txt", "README.txt", "readme.md", "Readme.md", "README.md"]
 readme = filein(readmes)
 if readme != "":
     longueur = filesize(readme)
