@@ -427,7 +427,7 @@ elif isfile("../image1.ppm"):
     im_file_prof.close()
     im_file_etu.close()
 else:
-    make_process = subprocess.run(['eog', 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    make_process = subprocess.run(['display', 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ok = input('image1 ok (o/n) ? ')
     if ok == 'n':
         msg("image1.ppm erronee", 0.5)
@@ -446,7 +446,7 @@ elif isfile("../image2.ppm"):
     im_file_prof.close()
     im_file_etu.close()
 else:
-    make_process = subprocess.run(['eog', 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    make_process = subprocess.run(['display', 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ok = input('image2 ok (o/n) ? ')
     if ok == 'n':
         msg("image2.ppm erronee", 0.5)

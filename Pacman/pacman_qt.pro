@@ -15,6 +15,7 @@ HEADERS  = \
 			src/core/Terrain.h \
                         src/qt/pacmangraphics.h \
     src/qt/fantomegraphicsitem.h
+
 QT += widgets
 
 INCLUDEPATH += src/core src/qt
