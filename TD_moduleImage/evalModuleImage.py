@@ -70,7 +70,7 @@ def rmfiles(thedir):
 def filesize(read, enco="utf-8"):
     if read != "":
         en = enco
-        #en = "latin1"
+        # en = "latin1"
         try:
             fs = open(read, 'r', encoding=en)
             texte = fs.read()
@@ -123,7 +123,7 @@ def replaceInFile(fin, fout, wordin, wordout):
 
 def isFiledatesOk(filedates, filemodif):
     ok = True
-    for f,lm in filedates.items():
+    for f, lm in filedates.items():
         if isfile(f):
             lastModif = os.stat(f).st_mtime_ns
             changed = lastModif != lm
@@ -131,6 +131,7 @@ def isFiledatesOk(filedates, filemodif):
             if f in filemodif:
                 ok = ok and (filemodif[f] == changed)
     return ok
+
 
 def isDepOk(f, filedates, filemodif):
     global VERBOSE
@@ -163,7 +164,7 @@ elif VERBOSE:
     print("Verification Linux OK")
 
 version = sys.version_info
-if version[0] != 3 or (version[0] == 3 and version[1] < 5): #minimum 3.5 pour subprocess.run() et glob recursif
+if version[0] != 3 or (version[0] == 3 and version[1] < 5):  # minimum 3.5 pour subprocess.run() et glob recursif
     print("ERREUR : vous devez executer ce script avec Python 3 (3.5 minimum) !")
     sys.exit(0)
 elif VERBOSE:
@@ -232,31 +233,37 @@ if VERBOSE:
     print("==> note = " + str(NOTE))
 
 ### VERIFICATION DES FICHIERS PRESENTS/ABSENTS ###
-FICHIERSIND = { #Fichiers attendus et indispensables
-            "Pixel.h" : {"nom": "Pixel", "ext": "h", "loc": "src"},
-            "Pixel.cpp" : {"nom": "Pixel", "ext": "cpp", "loc": "src"},
-            "Image.h" : {"nom": "Image", "ext": "h", "loc": "src"},
-            "Image.cpp" : {"nom": "Image", "ext": "cpp", "loc": "src"},
-            "mainTest.cpp" : {"nom": "mainTest", "ext": "cpp", "loc": "src"}
-        }
-FICHIERSNONIND = { #Fichiers attendus mais non indispensables (fichiers generes ou dont l'absence est traitee plus loin)
-            "mainExemple.cpp" : {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
-            "mainAffichage.cpp" : {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
-            "test" : {"nom": "test", "ext": "", "loc": "bin"},
-            "exemple" : {"nom": "exemple", "ext": "", "loc": "bin"},
-            "affichage" : {"nom": "affichage", "ext": "", "loc": "bin"},
-            "image1.ppm" : {"nom": "image1", "ext": "ppm", "loc": "data"},
-            "image2.ppm" : {"nom": "image2", "ext": "ppm", "loc": "data"},
-            "image.doxy" : {"nom": "image", "ext": "doxy", "loc": "doc"}
-        }
+FICHIERSIND = {  # Fichiers attendus et indispensables
+    "Pixel.h": {"nom": "Pixel", "ext": "h", "loc": "src"},
+    "Pixel.cpp": {"nom": "Pixel", "ext": "cpp", "loc": "src"},
+    "Image.h": {"nom": "Image", "ext": "h", "loc": "src"},
+    "Image.cpp": {"nom": "Image", "ext": "cpp", "loc": "src"},
+    "mainTest.cpp": {"nom": "mainTest", "ext": "cpp", "loc": "src"}
+}
+FICHIERSNONIND = {
+    # Fichiers attendus mais non indispensables (fichiers generes ou dont l'absence est traitee plus loin)
+    "mainExemple.cpp": {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
+    "mainAffichage.cpp": {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
+    "test": {"nom": "test", "ext": "", "loc": "bin"},
+    "exemple": {"nom": "exemple", "ext": "", "loc": "bin"},
+    "affichage": {"nom": "affichage", "ext": "", "loc": "bin"},
+    "image1.ppm": {"nom": "image1", "ext": "ppm", "loc": "data"},
+    "image2.ppm": {"nom": "image2", "ext": "ppm", "loc": "data"},
+    "image.doxy": {"nom": "image", "ext": "doxy", "loc": "doc"},
+    "testRegression": {"nom": "testRegression", "ext": "", "loc": "bin"},
+    "mainTestRegression.cpp": {"nom": "mainTestRegression", "ext": "cpp", "loc": "src"},
+    "ImageRegression.h": {"nom": "ImageRegression", "ext": "h", "loc": "src"}
+}
 FICHIERSPRESENTS = listfiles(".")
-for nc,prop in FICHIERSIND.items():
+for nc, prop in FICHIERSIND.items():
     present = False
     for f in FICHIERSPRESENTS:
         if f["nc"] == nc:
             present = True
     if not present:
-        msg("Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents", 5)
+        msg(
+            "Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents",
+            5)
         break
 doclatex = False
 for f in FICHIERSPRESENTS:
@@ -287,7 +294,8 @@ for f in FICHIERSPRESENTS:
         continue
     if f["nc"] in FICHIERSNONIND:
         continue
-    if "dia" == f["ext"] or "xmi" == f["ext"] or (("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
+    if "dia" == f["ext"] or "xmi" == f["ext"] or (
+        ("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
         if not "doc" in f["ch"]:
             msg("Le diagramme des classes " + f["nc"] + " doit etre dans le dossier doc/", 0.1)
         continue
@@ -334,7 +342,7 @@ if isfile("bin/test") or isfile("./test"):
 if isfile("bin/affichage") or isfile("./affichage"):
     msg("make clean ne supprime pas l'executable affichage", 0.1)
 
-#if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
+# if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
 if len(glob.glob("**/*.o", recursive=True)) != 0:
     msg("make clean ne supprime pas les fichiers objets", 0.5)
     print("Fichiers objets non supprimes:", end=' ')
@@ -342,7 +350,8 @@ if len(glob.glob("**/*.o", recursive=True)) != 0:
 
 for f in glob.glob("**/*.o", recursive=True):
     os.remove(f)
-for f in glob.glob('./exemple') + glob.glob('bin/exemple') + glob.glob('./test') + glob.glob('bin/test') + glob.glob('./affichage') + glob.glob('bin/affichage'):
+for f in glob.glob('./exemple') + glob.glob('bin/exemple') + glob.glob('./test') + glob.glob('bin/test') + glob.glob(
+        './affichage') + glob.glob('bin/affichage'):
     os.remove(f)
 
 print("===> make clean  ... done")
@@ -378,15 +387,20 @@ if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
 makedepok = True
 filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
 isFiledatesOk(filedates, {})
-makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False, 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Image.h', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False, 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Pixel.h', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) and makedepok
-makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False, 'bin/test': False}) and makedepok
+makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                                                    'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
+                                                 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Image.h', filedates,
+                    {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
+                                                 'bin/test': True}) and makedepok
+makedepok = isDepOk('src/Pixel.h', filedates,
+                    {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                                                 'bin/test': False}) and makedepok
 if not makedepok:
     msg('Toutes les dependances ne sont pas prises en compte dans le Makefile', 0.5)
-
 
 if VERBOSE:
     print("==> note = " + str(NOTE))
@@ -524,12 +538,15 @@ if isfile("bin/test"):
         print("Aucune fuite memoire")
 
     nb_invalid_write = str_stderr.count("Invalid write")
+    nb_invalid_read = str_stderr.count("Invalid read")
     if VERBOSE:
-        print("Nombre d'acces invalides : " + str(nb_invalid_write))
+        print("Nombre d'acces invalides : " + str(nb_invalid_write + nb_invalid_read))
     if nb_invalid_write > 0:
-        msg("Il y a " + str(nb_invalid_write) + " acces invalides a la memoire", min(nb_invalid_write * 0.1, 0.5))
-    elif VERBOSE:
-        print("Aucun acces invalide")
+        msg("Il y a " + str(nb_invalid_write) + " acces invalides en ecriture a la memoire",
+            min(nb_invalid_write * 0.1, 0.5))
+    if nb_invalid_read > 0:
+        msg("Il y a " + str(nb_invalid_read) + " acces invalides en lecture a la memoire",
+            min(nb_invalid_read * 0.1, 0.5))
 
 print("===> valgrind sur bin/test ... done")
 if VERBOSE:
