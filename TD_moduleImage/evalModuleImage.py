@@ -360,13 +360,13 @@ if VERBOSE:
     print("stderr:")
     print(make_process.stderr.decode("utf-8", "ignore"))
 if warning > 0:
-    msg("Il a " + str(warning) + " warnings a la compilation", min(warning * 0.1, 0.5))
+    msg("Il y a " + str(warning) + " warnings a la compilation", min(warning * 0.1, 0.5))
 elif VERBOSE:
     print("Pas de warning a la compilation")
 
 error = str(make_process.stderr).count("error:")
 if error > 0:
-    msg("Il a " + str(error) + " erreurs a la compilation!", 1)
+    msg("Il y a " + str(error) + " erreurs a la compilation!", 1)
 elif VERBOSE:
     print("Pas d'erreur a la compilation")
 
@@ -515,11 +515,11 @@ if isfile("bin/test"):
         if str_stderr.find("All heap blocks were fread") != -1:
             msg("Fuite memoire sur la pile", 0.5)
     else:
-        nb_bytes_lost = int(str_stderr[istart + 17:iend])
+        nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
     if VERBOSE:
         print("Nombre de bytes perdus : " + str(nb_bytes_lost))
     if nb_bytes_lost > 0:
-        msg("Il a " + str(nb_bytes_lost) + " octets perdus", min(nb_bytes_lost * 0.01, 0.5))
+        msg("Il y a " + str(nb_bytes_lost) + " octets perdus", min(nb_bytes_lost * 0.01, 0.5))
     elif VERBOSE:
         print("Aucune fuite memoire")
 
@@ -527,7 +527,7 @@ if isfile("bin/test"):
     if VERBOSE:
         print("Nombre d'acces invalides : " + str(nb_invalid_write))
     if nb_invalid_write > 0:
-        msg("Il a " + str(nb_invalid_write) + " acces invalides a la memoire", min(nb_invalid_write * 0.1, 0.5))
+        msg("Il y a " + str(nb_invalid_write) + " acces invalides a la memoire", min(nb_invalid_write * 0.1, 0.5))
     elif VERBOSE:
         print("Aucun acces invalide")
 
