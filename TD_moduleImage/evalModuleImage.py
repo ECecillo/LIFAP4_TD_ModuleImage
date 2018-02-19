@@ -21,11 +21,9 @@ def msg(pb, penalite):
     global RETOUR
     txt = "PROBLEME : " + pb + ". J'enleve " + str(penalite) + " points."
     print(txt)
-    NOTE = round(NOTE - penalite, 2)
+    if NOTE > 0:
+        NOTE = max(round(NOTE - penalite, 2), 0)
     RETOUR = RETOUR + "\n" + txt
-    if NOTE <= 0:
-        print("Note <= 0 ===> pas la peine d'aller plus loin ...")
-        sys.exit(0)
 
 
 def isdir(thefile):
@@ -189,10 +187,17 @@ for mot in FILENAME.replace("p", "1").split(".")[0].split("_"):
         if len(NUMEROS_ETU) > 1:
             NOM_ARCHIVE_ATTENDU += "_"
         NOM_ARCHIVE_ATTENDU += mot
+for mot in FILENAME.replace("P", "1").split(".")[0].split("_"):
+    if mot.isdigit() and len(mot) == 8:
+        NUMEROS_ETU.append(mot)
+        if len(NUMEROS_ETU) > 1:
+            NOM_ARCHIVE_ATTENDU += "_"
+        NOM_ARCHIVE_ATTENDU += mot
 if len(NUMEROS_ETU) == 0:
     print("ERREUR : aucun numero d'etudiant detecte dans: " + FILENAME)
     sys.exit(0)
-if not FILENAME.replace("p", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
+if not FILENAME.replace("p", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU) and not \
+FILENAME.replace("P", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
     msg("L'archive  " + FILENAME + "  ne suit pas le format NUM_ETU1_NUM_ETU2_NUM_ETU3.tgz", 0.5)
 f = FILENAME
 if "#" in f:
@@ -217,8 +222,9 @@ print("===> decompression de l'archive ... done")
 
 ###  VERIFICATION DE L'ARBORESCENCE  ###
 print("===> verification de l'arborescence ...")
-if not isdir(DIR):
-    msg("Repertoire principal inexistant", 5)
+if not isdir(DIR) or DIR == ".":
+    print("ERREUR : Repertoire principal inexistant")
+    sys.exit(0)
 os.chdir(os.getcwd() + "/" + DIR)
 if not isdir("bin"):
     msg("Dossier bin inexistant", 0.5)
@@ -295,7 +301,7 @@ for f in FICHIERSPRESENTS:
     if f["nc"] in FICHIERSNONIND:
         continue
     if "dia" == f["ext"] or "xmi" == f["ext"] or (
-        ("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
+                ("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
         if not "doc" in f["ch"]:
             msg("Le diagramme des classes " + f["nc"] + " doit etre dans le dossier doc/", 0.1)
         continue
@@ -400,7 +406,7 @@ makedepok = isDepOk('src/Pixel.h', filedates,
 makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
                                                  'bin/test': False}) and makedepok
 if not makedepok:
-    msg('Toutes les dependances ne sont pas prises en compte dans le Makefile', 0.5)
+    msg('Toutes les dependances ne sont pas prises en compte dans le Makefile', 0.25)
 
 if VERBOSE:
     print("==> note = " + str(NOTE))
@@ -435,7 +441,7 @@ elif isfile("../image1.ppm"):
     im_file_prof = open("../image1.ppm", 'r')
     image_prof = im_file_prof.read()
     if image_etu != image_prof:
-        msg("image1.ppm erronee", 0.5)
+        msg("image1.ppm erronee", 0.25)
     elif VERBOSE:
         print("image1.ppm OK")
     im_file_prof.close()
@@ -447,14 +453,14 @@ else:
         msg("image1.ppm erronee", 0.5)
 
 if not isfile("data/image2.ppm"):
-    msg("image2.ppm non generee  (ou pas dans data)", 0.5)
+    msg("image2.ppm non generee (ou pas dans data)", 0.5)
 elif isfile("../image2.ppm"):
     im_file_etu = open("data/image2.ppm", 'r')
     image_etu = im_file_etu.read()
     im_file_prof = open("../image2.ppm", 'r')
     image_prof = im_file_prof.read()
     if image_etu != image_prof:
-        msg("image2.ppm erronee", 0.5)
+        msg("image2.ppm erronee", 0.25)
     elif VERBOSE:
         print("image2.ppm OK")
     im_file_prof.close()
@@ -487,13 +493,15 @@ if isfile("../mainTestRegression.cpp"):
     replaceInFile('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
     subprocess.run(['cp', '../mainTestRegression.cpp', 'src/mainTestRegression.cpp'])
     subprocess.run(
-        ['g++', '-ggdb', '-c', 'src/mainTestRegression.cpp', '-I/usr/include/SDL2', '-o', 'obj/mainTestRegression.o'])
-    subprocess.run(['g++', '-ggdb', '-c', 'src/Image.cpp', '-I/usr/include/SDL2', '-o', 'obj/Image.o'])
+        ['g++', '-ggdb', '-std=c++11', '-c', 'src/mainTestRegression.cpp', '-I/usr/include/SDL2', '-o',
+         'obj/mainTestRegression.o'])
+    subprocess.run(['g++', '-ggdb', '-std=c++11', '-c', 'src/Image.cpp', '-I/usr/include/SDL2', '-o', 'obj/Image.o'])
     subprocess.run(
-        ['g++', '-ggdb', '-o', 'bin/testRegression', 'obj/mainTestRegression.o', 'obj/Image.o', 'obj/Pixel.o', '-lSDL2',
+        ['g++', '-ggdb', '-std=c++11', '-o', 'bin/testRegression', 'obj/mainTestRegression.o', 'obj/Image.o',
+         'obj/Pixel.o', '-lSDL2',
          '-lSDL2_ttf', '-lSDL2_image'])
     if not isfile("bin/testRegression"):
-        msg("Le test de regression prof ne peut pas compiler (voir plus haut les erreurs de compilation)", 1)
+        msg("Le test de regression prof ne peut pas compiler (voir ci-dessus les erreurs de compilation)", 0.5)
     else:
         make_process = subprocess.run(['bin/testRegression'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if VERBOSE:
@@ -611,31 +619,11 @@ if doxy != "":
     v1 = isfile("doc/html/class_image.html")
     v2 = isfile("doc/html/classImage.html")
     if not v1 and not v2:
-        msg("Doxygen n'a pas genere de doc pour la classe Image", 0.5)
-    else:
-        sz = 0
-        if v1:
-            sz = filesize("doc/html/class_image.html", 'latin-1')
-        if v2:
-            sz = filesize("doc/html/classImage.html", 'latin-1')
-        if VERBOSE:
-            print("taille de la page de la classe Image : " + str(sz) + " octets")
-        if sz < 15000:
-            msg("Documentation de la classe Image insuffisante", 0.25)
+        msg("Doxygen n'a pas genere de doc pour la classe Image", 0.25)
     v1 = isfile("doc/html/class_pixel.html")
     v2 = isfile("doc/html/classPixel.html")
     if not v1 and not v2:
-        msg("Doxygen n'a pas genere de doc pour la classe Pixel", 0.5)
-    else:
-        sz = 0
-        if v1:
-            sz = filesize("doc/html/class_pixel.html", 'latin-1')
-        if v2:
-            sz = filesize("doc/html/classPixel.html", 'latin-1')
-        if VERBOSE:
-            print("taille de la page de la classe Pixel : " + str(sz) + " octets")
-        if sz < 10000:
-            msg("Documentation de la classe Pixel insuffisante", 0.25)
+        msg("Doxygen n'a pas genere de doc pour la classe Pixel", 0.25)
 else:
     msg("doc/image.doxy introuvable", 1)
 
@@ -649,9 +637,9 @@ if VERBOSE:
     print("Nombre de fonctions commentees : " + str(n_brief))
     print("Nombre de parametres commentes : " + str(n_param))
 if n_brief < 20:
-    msg("Pas assez de fonctions commentees", 0.5)
+    msg("Pas assez de fonctions commentees", 0.25)
 if n_param < 15:
-    msg("Pas assez de parametres commentees", 0.5)
+    msg("Pas assez de parametres commentees", 0.25)
 
 print("===> documentation ... done")
 if VERBOSE:
