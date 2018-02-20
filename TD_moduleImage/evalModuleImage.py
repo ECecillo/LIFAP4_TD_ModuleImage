@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+import shutil
 import sys
 from sys import platform
 import tarfile
@@ -54,10 +55,11 @@ def listfiles(a):
 
 def rmfiles(thedir):
     if isdir(thedir):
-        files = glob.glob(thedir + "/*")
-        for f in files:
-            rmfiles(f)
-        os.rmdir(thedir)
+        #files = glob.glob(thedir + "/*")
+        #for f in files:
+        #    rmfiles(f)
+        #os.rmdir(thedir)
+        shutil.rmtree(thedir, ignore_errors=True) #fonctionne meme s'il y a des fichiers caches
     else:
         if isfile(thedir):
             os.remove(thedir)
@@ -212,7 +214,14 @@ if VERBOSE:
 ###  EXTRACTION DE L'ARCHIVE  ###
 print("===> decompression de l'archive ...")
 tar = tarfile.open(FILENAME)
-DIR = tar.members[0].name.split("/")[0]
+#DIR = tar.members[0].name.split("/")[0]
+DIR = None
+for tarmember in tar:
+    if tarmember.isdir() and '/' not in tarmember.name:
+        DIR = tarmember.name
+if DIR is None:
+    print("Aucun dossier a la racine de l'archive")
+    sys.exit(0)
 if VERBOSE:
     print("Repertoire principal = " + DIR)
 if DIR != NOM_ARCHIVE:
@@ -402,12 +411,14 @@ makedepok = isDepOk('src/Image.h', filedates,
                     {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
 makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
                                                  'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Pixel.h', filedates,
-                    {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+makedepok = (isDepOk('src/Pixel.h', filedates,
+                    {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
+            isDepOk('src/Pixel.h', filedates,
+                    {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True})) and makedepok
 makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
                                                  'bin/test': False}) and makedepok
 if not makedepok:
-    msg('Toutes les dependances ne sont pas prises en compte dans le Makefile', 0.25)
+    msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
 
 if VERBOSE:
     print("==> note = " + str(NOTE))
