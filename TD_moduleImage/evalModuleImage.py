@@ -753,7 +753,27 @@ print(RETOUR)
 print("Les etudiants ayant comme numeros : ", end='')
 print(*NUMEROS_ETU, sep=' , ', end=' ')
 print("ont la note " + str(NOTE) + "\n")
-for etu in NUMEROS_ETU:
-    foutput = open('../' + str(etu) + '#feedback.txt', 'w')
-    foutput.write(NOM_ARCHIVE + " : " + str(NOTE) + "\n" + RETOUR)
-    foutput.close()
+
+###  FICHIERS FEEDBACK ET NOTES  ###
+if isfile("../mainTestRegression.cpp"): #mode prof
+    for etu in NUMEROS_ETU:
+        foutput = open('../' + str(etu) + '#feedback.txt', 'w')
+        foutput.write(NOM_ARCHIVE + " : " + str(NOTE) + "\n" + RETOUR)
+        foutput.close()
+
+    foutput = None
+    if isfile("../notesEtudiants.txt"):
+        foutput = open('../notesEtudiants.txt', 'r')
+        if foutput.read().find(str(NUMEROS_ETU[0])) == -1:
+            foutput.close()
+            foutput = open('../notesEtudiants.txt', 'a')
+            for etu in NUMEROS_ETU:
+                foutput.write(str(etu) + " " + str(NOTE) + "\n")
+            foutput.close()
+        else:
+            foutput.close()
+    else:
+        foutput = open('../notesEtudiants.txt', 'w')
+        for etu in NUMEROS_ETU:
+            foutput.write(str(etu) + " " + str(NOTE) + "\n")
+        foutput.close()
