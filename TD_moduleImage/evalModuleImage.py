@@ -9,12 +9,10 @@ import glob
 import re
 
 ###          OPTION D'EVALUATION       ###
-MODES = ["FULLAUTO", "SEMIAUTO"]
-MODE = "FULLAUTO"
-# MODE = "SEMIAUTO"
-
+MODES = ["FULLAUTO", "SEMIAUTO", "PERSO"]
+MODE = "PERSO"
 VERBOSE = True
-# VERBOSE = False
+
 
 ###          FONCTIONNALITES           ###
 def msg(pb, penalite):
@@ -146,6 +144,12 @@ def isDepOk(f, filedates, filemodif):
     return ok
 
 
+def replaceAll(text, dic):
+    for i, j in dic.items():
+        text = text.replace(i, j)
+    return text
+
+
 ###           EXECUTION DU SCRIPT          ###
 
 ###  INIT  ###
@@ -183,23 +187,20 @@ if VERBOSE:
     print("===> note initiale = " + str(NOTE))
 NUMEROS_ETU = []
 NOM_ARCHIVE_ATTENDU = ""
-for mot in FILENAME.replace("p", "1").split(".")[0].split("_"):
+
+replaceP = {"p": "1", "P": "1"}
+FILENAME_P_REPLACED = replaceAll(FILENAME, replaceP)
+for mot in FILENAME_P_REPLACED.split(".")[0].split("_"):
     if mot.isdigit() and len(mot) == 8:
         NUMEROS_ETU.append(mot)
         if len(NUMEROS_ETU) > 1:
             NOM_ARCHIVE_ATTENDU += "_"
         NOM_ARCHIVE_ATTENDU += mot
-for mot in FILENAME.replace("P", "1").split(".")[0].split("_"):
-    if mot.isdigit() and len(mot) == 8:
-        NUMEROS_ETU.append(mot)
-        if len(NUMEROS_ETU) > 1:
-            NOM_ARCHIVE_ATTENDU += "_"
-        NOM_ARCHIVE_ATTENDU += mot
+
 if len(NUMEROS_ETU) == 0:
     print("ERREUR : aucun numero d'etudiant detecte dans: " + FILENAME)
     sys.exit(0)
-if not FILENAME.replace("p", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU) and not \
-FILENAME.replace("P", "1").split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
+if not FILENAME_P_REPLACED.split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
     msg("L'archive  " + FILENAME + "  ne suit pas le format NUM_ETU1_NUM_ETU2_NUM_ETU3.tgz", 0.5)
 f = FILENAME
 if "#" in f:
@@ -497,6 +498,8 @@ else:
         print(make_process.stdout.decode("utf-8", "ignore"))
         print("stderr:")
         print(make_process.stderr.decode("utf-8", "ignore"))
+    if make_process.stderr.decode("utf-8", "ignore").find("Assertion") != -1:
+        msg("Arret de bin/test non prevu : echec d'une assertion", 0.25)
 
 if isfile("../mainTestRegression.cpp"):
     if VERBOSE:
@@ -523,7 +526,7 @@ if isfile("../mainTestRegression.cpp"):
         errors = make_process.stdout.decode("utf-8", "ignore")
         nb_errors = errors.count("ERREUR")
         if nb_errors > 0:
-            msg("Il y a " + str(nb_errors) + " erreurs dans les tests de regression", min(nb_errors * 0.1, 0.5))
+            msg("Il y a " + str(nb_errors) + " erreurs dans les tests de regression prof", min(nb_errors * 0.1, 0.5))
         if VERBOSE:
             print("Test de regression ... done")
 
@@ -576,7 +579,7 @@ print("===> bin/affichage ...")
 if not isfile("bin/affichage"):
     msg("make ne genere pas bin/affichage", 0.5)
 else:
-    if MODE == "SEMIAUTO":
+    if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['bin/affichage'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if VERBOSE:
             print("stdout:")
@@ -603,15 +606,15 @@ if readme != "":
     longueur = filesize(readme)
     if VERBOSE:
         print("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
-    if MODE == "SEMIAUTO":
+    if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['gedit', readme], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         ok = input('readme ok (o/n) ? ')
         if ok == 'n':
-            msg("readme pas ok", 1)
+            msg("readme pas assez detaille", 0.5)
     elif longueur < 500:
         msg(readme + " pas assez detaille", 0.5)
 else:
-    msg("readme introuvable", 1)
+    msg("readme introuvable", 0.5)
 
 print("===> readme ... done")
 if VERBOSE:
@@ -626,7 +629,7 @@ if doxy != "":
     rmfiles("doc/latex")
     make_process = subprocess.run(['doxygen', doxy], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if not isfile("doc/html/index.html"):
-        msg("Doxygen n'a pas genere doc/html/index.html, mauvais chemin dans OUTPUT_DIRECTORY et/ou INPUT?", 1)
+        msg("Doxygen n'a pas genere doc/html/index.html, mauvais chemin dans OUTPUT_DIRECTORY et/ou INPUT?", 0.5)
     v1 = isfile("doc/html/class_image.html")
     v2 = isfile("doc/html/classImage.html")
     if not v1 and not v2:
@@ -675,7 +678,7 @@ if VERBOSE:
 
 ###  CODE  ###
 print("===> code ...")
-if MODE == "FULLAUTO":
+if MODE == "FULLAUTO" or MODE == "PERSO":
     ## Pixel.h ##
     files = ["src/Pixel.h", "src/pixel.h"]
     for f in files:
@@ -736,7 +739,7 @@ else:
     command = ['gedit']
     command.extend(glob.glob("src/*.*"))
     make_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    points = min(int(input('nombre de points a deduire ? ')), 2)
+    points = min(int(input('nombre de points a deduire ? ')), 3)
     if points > 0:
         msg("Erreurs dans le code", points)
 
