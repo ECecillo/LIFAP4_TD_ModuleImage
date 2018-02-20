@@ -215,13 +215,14 @@ if VERBOSE:
 print("===> decompression de l'archive ...")
 tar = tarfile.open(FILENAME)
 #DIR = tar.members[0].name.split("/")[0]
-DIR = None
+DIR = "aucun_repertoire_principal"
 for tarmember in tar:
     if tarmember.isdir() and '/' not in tarmember.name:
         DIR = tarmember.name
-if DIR is None:
-    print("Aucun dossier a la racine de l'archive")
-    sys.exit(0)
+if DIR == "aucun_repertoire_principal":
+    msg("Aucun dossier a la racine de l'archive", 5)
+    if not isdir(DIR):
+        os.mkdir(DIR)
 if VERBOSE:
     print("Repertoire principal = " + DIR)
 if DIR != NOM_ARCHIVE:
@@ -315,7 +316,7 @@ for f in FICHIERSPRESENTS:
         if not "doc" in f["ch"]:
             msg("Le diagramme des classes " + f["nc"] + " doit etre dans le dossier doc/", 0.1)
         continue
-    msg("Le fichier " + f["nc"] + " ne doit pas etre la", 0.1)
+    msg("Le fichier/dossier " + f["nc"] + " ne doit pas etre la", 0.1)
 if doclatex:
     msg("La documentation n'est pas demandee en latex", 0.1)
 print("===> verification des fichiers presents... done")
