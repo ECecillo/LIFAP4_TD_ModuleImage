@@ -8,17 +8,20 @@ import subprocess
 import glob
 import re
 
-###          OPTION D'EVALUATION       ###
+###          OPTIONS D'EVALUATION       ###
 MODES = ["FULLAUTO", "SEMIAUTO", "PERSO"]
 MODE = "PERSO"
 VERBOSE = True
 
+###          AUTRES OPTIONS             ###
+VIEWER = 'display' #visualiseur d'images (display / eog)
 
-###          FONCTIONNALITES           ###
+
+###          FONCTIONNALITES            ###
 def msg(pb, penalite):
     global NOTE
     global RETOUR
-    txt = "PROBLEME : " + pb + ". J'enleve " + str(penalite) + " points."
+    txt = "PROBLEME : " + pb + ". J'enleve " + str(round(penalite, 2)) + " points."
     print(txt)
     if NOTE > 0:
         NOTE = max(round(NOTE - penalite, 2), 0)
@@ -149,6 +152,23 @@ def replaceAll(text, dic):
         text = text.replace(i, j)
     return text
 
+def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
+    #echelle predefinie dans la liste ci-dessous,
+    #ou echelle personnalisee, e.g., utilisateurEvalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
+    echelles = {
+        'oui/non': ['n', 'o'],
+        'ech3': ['n', 'm', 'o'],
+        'ech7': ['n', 'n+', 'm-', 'm', 'm+', 'o-', 'o'] }
+    if str(echelle) in echelles:
+        ech = echelles[echelle]
+    else:
+        ech = echelle
+    evaluation = ''
+    while evaluation not in ech:
+        evaluation = input(msgInvit + ' (' + '/'.join(ech) + ') ? ')
+        if evaluation in ech[0:-1]:
+            msg(msgPb, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
+
 
 ###           EXECUTION DU SCRIPT          ###
 
@@ -221,8 +241,9 @@ for tarmember in tar:
         DIR = tarmember.name
 if DIR == "aucun_repertoire_principal":
     msg("Aucun dossier a la racine de l'archive", 5)
-    if not isdir(DIR):
-        os.mkdir(DIR)
+    if isdir(DIR):
+        shutil.rmtree(DIR, ignore_errors=True)
+    os.mkdir(DIR)
 if VERBOSE:
     print("Repertoire principal = " + DIR)
 if DIR != NOM_ARCHIVE:
@@ -460,10 +481,8 @@ elif isfile("../image1.ppm"):
     im_file_prof.close()
     im_file_etu.close()
 else:
-    make_process = subprocess.run(['display', 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    ok = input('image1 ok (o/n) ? ')
-    if ok == 'n':
-        msg("image1.ppm erronee", 0.5)
+    make_process = subprocess.run([VIEWER, 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    utilisateurEvalue('image1 ok', 'image1.ppm erronee', 0.5)
 
 if not isfile("data/image2.ppm"):
     msg("image2.ppm non generee (ou pas dans data)", 0.5)
@@ -479,10 +498,8 @@ elif isfile("../image2.ppm"):
     im_file_prof.close()
     im_file_etu.close()
 else:
-    make_process = subprocess.run(['display', 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    ok = input('image2 ok (o/n) ? ')
-    if ok == 'n':
-        msg("image2.ppm erronee", 0.5)
+    make_process = subprocess.run([VIEWER, 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    utilisateurEvalue('image2 ok', 'image2.ppm erronee', 0.5)
 
 print("===> bin/exemple ... done")
 if VERBOSE:
@@ -587,13 +604,10 @@ else:
             print(make_process.stdout.decode("utf-8", "ignore"))
             print("stderr:")
             print(make_process.stderr.decode("utf-8", "ignore"))
-        ok = input('affichage image ok (o/n) ? ')
-        if ok == 'n':
-            msg("bin/affichage non fonctionnel", 0.5)
-        ok = input('zoom/dezoom ok (o/n) ? ')
-        if ok == 'n':
-            msg("zoom/dezoom non fonctionnel", 0.25)
-            # TODO : else: automatiser la verif de bin/affichage
+        utilisateurEvalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
+            #echelle d'appreciations ech3: n (non/insuffisant), m (moyen), o (oui/bien)
+        utilisateurEvalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
+        # TODO : else: automatiser la verif de bin/affichage
 
 print("===> bin/affichage ... done")
 if VERBOSE:
@@ -609,9 +623,8 @@ if readme != "":
         print("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['gedit', readme], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        ok = input('readme ok (o/n) ? ')
-        if ok == 'n':
-            msg("readme pas assez detaille", 0.5)
+        utilisateurEvalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
+            #echelle d'appreciations ech7: n (non/insuffisant), n+, m-, m (moyen), m+, o-, o (oui/bien)
     elif longueur < 500:
         msg(readme + " pas assez detaille", 0.5)
 else:
