@@ -79,7 +79,7 @@ def filesize(read, enco="utf-8"):
             en = "latin1"
         except Error as exc_ret:
             print(exc_ret)
-            sys.exit(-1)
+            sys.exit(1)
         finally:
             fs.close()
         fs = open(read, 'r', encoding=en)
@@ -155,6 +155,8 @@ def replaceAll(text, dic):
 def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
     #echelle predefinie dans la liste ci-dessous,
     #ou echelle personnalisee, e.g., utilisateurEvalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
+    #l'utilisateur peut falcutativement ajouter un commentaire en le séparant de l'appreciation avec '#'
+    #par exemple : ...$ readme ok (n/n+/m-/m/m+/o-/o) ? o-#manquent les noms et numeros d'etudiants
     echelles = {
         'oui/non': ['n', 'o'],
         'ech3': ['n', 'm', 'o'],
@@ -166,8 +168,12 @@ def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
     evaluation = ''
     while evaluation not in ech:
         evaluation = input(msgInvit + ' (' + '/'.join(ech) + ') ? ')
+        message = msgPb
+        if '#' in evaluation:
+            message += ' / ' + evaluation.split('#')[1]
+            evaluation = evaluation.split('#')[0]
         if evaluation in ech[0:-1]:
-            msg(msgPb, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
+            msg(message, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
 
 
 ###           EXECUTION DU SCRIPT          ###
@@ -563,13 +569,32 @@ if isfile("bin/test"):
         print(make_process.stderr.decode("utf-8", "ignore"))
     str_stderr = make_process.stderr.decode("utf-8", "ignore")
     istart = int(str_stderr.find("definitely lost: "))
-    iend = int(str_stderr.find("bytes", istart))
+    #iend = int(str_stderr.find("bytes", istart))
+    iend = int(str_stderr.find("suppressed:", istart))
     nb_bytes_lost = 0
     if istart == -1 and iend == -1:
         if str_stderr.find("All heap blocks were fread") != -1:
             msg("Fuite memoire sur la pile", 0.5)
     else:
-        nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
+        #nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
+        nb_bytes_lost = 0
+        leak_sum = str_stderr[istart:iend+60]
+        nb_bytes_lost += int(
+            leak_sum[int(leak_sum.find("definitely lost: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
+        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
+        nb_bytes_lost += int(
+            leak_sum[int(leak_sum.find("indirectly lost: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
+        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
+        nb_bytes_lost += int(
+            leak_sum[int(leak_sum.find("possibly lost: ")) + 15:int(leak_sum.find("bytes"))].replace(',', ''))
+        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
+        nb_bytes_lost += int(
+            leak_sum[int(leak_sum.find("still reachable: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
+        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
+        nb_bytes_lost += int(
+            leak_sum[int(leak_sum.find("suppressed: ")) + 12:int(leak_sum.find("bytes"))].replace(',', ''))
+        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
+
     if VERBOSE:
         print("Nombre de bytes perdus : " + str(nb_bytes_lost))
     if nb_bytes_lost > 0:
