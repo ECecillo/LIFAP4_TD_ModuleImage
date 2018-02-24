@@ -559,7 +559,10 @@ if VERBOSE:
     print("==> note = " + str(NOTE))
 
 print("===> valgrind sur bin/test ...")
-if isfile("bin/test"):
+#if isfile("bin/test"):
+if not isfile("bin/test"):
+    msg("executable bin/test absent, test valgrind sur bin/test impossible", 1.5)
+else:
     make_process = subprocess.run(['valgrind', '--tool=memcheck', '--leak-check=summary', 'bin/test'],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
