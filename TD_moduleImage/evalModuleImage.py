@@ -7,6 +7,7 @@ import tarfile
 import subprocess
 import glob
 import re
+import csv
 
 ###          OPTIONS D'EVALUATION       ###
 MODES = ["FULLAUTO", "SEMIAUTO", "PERSO"]
@@ -78,8 +79,7 @@ def filesize(read, enco="utf-8"):
         except UnicodeDecodeError:
             en = "latin1"
         except Error as exc_ret:
-            print(exc_ret)
-            sys.exit(1)
+            raise(exc_ret)
         finally:
             fs.close()
         fs = open(read, 'r', encoding=en)
@@ -152,10 +152,11 @@ def replaceAll(text, dic):
         text = text.replace(i, j)
     return text
 
+
 def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
     #echelle predefinie dans la liste ci-dessous,
     #ou echelle personnalisee, e.g., utilisateurEvalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
-    #l'utilisateur peut falcutativement ajouter un commentaire en le séparant de l'appreciation avec '#'
+    #l'utilisateur peut falcutativement ajouter un commentaire en le separant de l'appreciation avec '#'
     #par exemple : ...$ readme ok (n/n+/m-/m/m+/o-/o) ? o-#manquent les noms et numeros d'etudiants
     echelles = {
         'oui/non': ['n', 'o'],
@@ -167,13 +168,85 @@ def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
         ech = echelle
     evaluation = ''
     while evaluation not in ech:
-        evaluation = input(msgInvit + ' (' + '/'.join(ech) + ') ? ')
+        reponse = input(msgInvit + ' (' + '/'.join(ech) + ') ? (precedemment:'
+            + persisteArchVal(msgInvit, 'rstr') + ') ')
         message = msgPb
-        if '#' in evaluation:
-            message += ' / ' + evaluation.split('#')[1]
-            evaluation = evaluation.split('#')[0]
+        evaluation = reponse
+        if '#' in reponse:
+            message += ' / ' + reponse.split('#')[1]
+            evaluation = reponse.split('#')[0]
         if evaluation in ech[0:-1]:
             msg(message, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
+        if evaluation in ech:
+            persisteArchVal(msgInvit, 'w', reponse)
+
+
+def persisteArchVal(champ_in, action='r', valeur_in=None):
+    champs = ['nomArchive', 'nomFichier', 'numsEtu', 'repPrinc', 'note',
+        'image1 ok', 'image2 ok', 'affichage image ok', 'zoom/dezoom ok', 'readme ok']
+    return persisteValeur('../eval_archives.csv', champs, NOM_ARCHIVE, champ_in, action, valeur_in)
+
+
+def persisteEtuVal(num_etu, champ_in='note', action='w', valeur_in=None):
+    champs = ['numEtu', 'note']
+    return persisteValeur('../eval_etudiants.csv', champs, num_etu, champ_in, action, valeur_in)
+
+
+#persite dans le fichier csv 'nom_fichier' pour la ligne identifiee par la clef 'clef'
+#une valeur 'valeur_in' d'un champ 'champ_in' parmi le schema defini dans 'champs'
+#le premier champ de 'champs' est la clef des lignes du fichier csv
+#le fichier csv est editable avec un tableur type Excel avec separateur=tabulation
+#parametre 'action' : 'r' lire la valeur du champ, 'rstr' lire+convertir en chaîne, 'w' mettre a jour
+#meme si fichier ou ligne absente, toute action creee le fichier et la ligne (avec des valeurs vides)
+def persisteValeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=None):
+    if champ_in not in champs:
+        raise(Exception('ERREUR : champ "' + champ_in
+            + '" non present parmi les champs du fichier csv ' + nom_fichier))
+    else:
+        clef_champ = champs[0]
+        clef_valeur = clef
+        #creation si besoin fichier csv vide
+        if not isfile(nom_fichier):
+            with open(nom_fichier, 'w', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=champs, dialect='excel-tab', quoting=csv.QUOTE_NONE)
+                writer.writeheader()
+            csvfile.close()
+        #lecture fichier -> modele
+        data={}
+        with open(nom_fichier, newline='') as csvfile:
+            reader = csv.DictReader(csvfile, dialect='excel-tab', quoting=csv.QUOTE_NONE)
+            for row in reader:
+                data[row[clef_champ]] = row
+        csvfile.close()
+        if reader.fieldnames != champs:
+            raise(Exception('ERREUR : les champs du fichier csv ' + nom_fichier + ' ' + ','.join(reader.fieldnames)
+                + ' ne correspondent pas au schema ' + ','.join(champs)))
+        else:
+            #ajout si besoin d'une entree au modele
+            if clef_valeur not in data:
+                row = {}
+                for champ in champs:
+                    row[champ] = None
+                row[clef_champ] = clef_valeur
+                data[clef_valeur] = row
+            #action lecture ou ecriture
+            if action == 'r':
+                return data[clef_valeur][champ_in]
+            elif action == 'rstr':
+                return str(data[clef_valeur][champ_in])
+            elif action == 'w':
+                #maj donnee dans modele
+                data[clef_valeur][champ_in] = valeur_in
+                #ecriture modele -> fichier
+                with open(nom_fichier, 'w', newline='') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=champs, dialect='excel-tab', quoting=csv.QUOTE_NONE)
+                    writer.writeheader()
+                    for row in data.values():
+                        writer.writerow(row)
+                csvfile.close()
+            else:
+                raise(Exception('ERREUR : action csv inconnue : ' + action))
+
 
 
 ###           EXECUTION DU SCRIPT          ###
@@ -819,3 +892,15 @@ if isfile("../mainTestRegression.cpp"): #mode prof
         for etu in NUMEROS_ETU:
             foutput.write(str(etu) + " " + str(NOTE) + "\n")
         foutput.close()
+
+    persisteArchVal('nomFichier', 'w', FILENAME)
+    persisteArchVal('numsEtu', 'w', '#'.join(NUMEROS_ETU))
+    persisteArchVal('repPrinc', 'w', DIR)
+    persisteArchVal('note', 'w', NOTE)
+
+    for etu in NUMEROS_ETU:
+        persisteEtuVal(etu, 'note', 'w', NOTE)
+
+print("-----------------------FIN DU SCRIPT--------------------------")
+input('Appuyer sur Entree pour quitter...')
+
