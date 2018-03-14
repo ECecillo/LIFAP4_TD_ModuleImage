@@ -354,38 +354,25 @@ if VERBOSE:
     msg("==> note = " + str(NOTE))
 
 ### VERIFICATION DES FICHIERS PRESENTS/ABSENTS ###
-FICHIERSIND = {  # Fichiers attendus et indispensables
+FICHIERSDEPMAKEFILE = {  # Fichiers indispensables au test des dependances du Makefile
     "Pixel.h": {"nom": "Pixel", "ext": "h", "loc": "src"},
     "Pixel.cpp": {"nom": "Pixel", "ext": "cpp", "loc": "src"},
     "Image.h": {"nom": "Image", "ext": "h", "loc": "src"},
     "Image.cpp": {"nom": "Image", "ext": "cpp", "loc": "src"},
     "mainTest.cpp": {"nom": "mainTest", "ext": "cpp", "loc": "src"}
 }
-FICHIERSNONIND = {
-    # Fichiers attendus mais non indispensables (fichiers generes ou dont l'absence est traitee plus loin)
+FICHIERSATTENDUS = {
+    # Autres fichiers attendus ou qui peuvent etre presents (fichiers generes ou dont l'absence est traitee plus loin)
     "mainExemple.cpp": {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
     "mainAffichage.cpp": {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
+    "image.doxy": {"nom": "image", "ext": "doxy", "loc": "doc"},
     "test": {"nom": "test", "ext": "", "loc": "bin"},
     "exemple": {"nom": "exemple", "ext": "", "loc": "bin"},
     "affichage": {"nom": "affichage", "ext": "", "loc": "bin"},
     "image1.ppm": {"nom": "image1", "ext": "ppm", "loc": "data"},
-    "image2.ppm": {"nom": "image2", "ext": "ppm", "loc": "data"},
-    "image.doxy": {"nom": "image", "ext": "doxy", "loc": "doc"},
-    "testRegression": {"nom": "testRegression", "ext": "", "loc": "bin"},
-    "mainTestRegression.cpp": {"nom": "mainTestRegression", "ext": "cpp", "loc": "src"},
-    "ImageRegression.h": {"nom": "ImageRegression", "ext": "h", "loc": "src"}
+    "image2.ppm": {"nom": "image2", "ext": "ppm", "loc": "data"}
 }
 FICHIERSPRESENTS = listfiles(".")
-for nc, prop in FICHIERSIND.items():
-    present = False
-    for f in FICHIERSPRESENTS:
-        if f["nc"] == nc:
-            present = True
-    if not present:
-        msg(
-            "Au minimum, tous les fichiers Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents",
-            5)
-        break
 doclatex = False
 for f in FICHIERSPRESENTS:
     if "/html" in f["ch"]:
@@ -411,9 +398,9 @@ for f in FICHIERSPRESENTS:
         continue
     if f["nom"].lower() == "readme":
         continue
-    if f["nc"] in FICHIERSIND:
+    if f["nc"] in FICHIERSDEPMAKEFILE:
         continue
-    if f["nc"] in FICHIERSNONIND:
+    if f["nc"] in FICHIERSATTENDUS:
         continue
     if "dia" == f["ext"] or "xmi" == f["ext"] or (
                 ("png" == f["ext"].lower() or "jpg" == f["ext"].lower()) and "diagramme" in f["nom"].lower()):
@@ -506,25 +493,40 @@ if len(glob.glob("**/*.o", recursive=True)) != 5:
 if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
     msg("Fichiers objets dans le mauvais repertoire", 0.5)
 
-makedepok = True
-filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
-isFiledatesOk(filedates, {})
-makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
-                                                    'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
-                                                 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Image.h', filedates,
-                    {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
-makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
-                                                 'bin/test': True}) and makedepok
-makedepok = (isDepOk('src/Pixel.h', filedates,
-                    {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
-            isDepOk('src/Pixel.h', filedates,
-                    {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True})) and makedepok
-makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
-                                                 'bin/test': False}) and makedepok
-if not makedepok:
-    msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
+touspresents = True
+for nc, prop in FICHIERSDEPMAKEFILE.items():
+    present = False
+    for f in FICHIERSPRESENTS:
+        if f["nc"] == nc:
+            present = True
+            break
+    if not present:
+        touspresents = False
+        break
+if touspresents:
+    makedepok = True
+    filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
+    isFiledatesOk(filedates, {})
+    makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                                                        'bin/test': True}) and makedepok
+    makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
+                                                     'bin/test': True}) and makedepok
+    makedepok = isDepOk('src/Image.h', filedates,
+                        {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
+    makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
+                                                     'bin/test': True}) and makedepok
+    makedepok = (isDepOk('src/Pixel.h', filedates,
+                        {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
+                isDepOk('src/Pixel.h', filedates,
+                        {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True})) and makedepok
+    makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                                                     'bin/test': False}) and makedepok
+    if not makedepok:
+        msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
+else:
+    msg(
+        "Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents pour verifier les dependances du Makefile",
+        0.25)
 
 if VERBOSE:
     msg("==> note = " + str(NOTE))
