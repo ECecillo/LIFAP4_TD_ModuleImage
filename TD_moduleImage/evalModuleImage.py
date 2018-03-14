@@ -19,14 +19,17 @@ VIEWER = 'display' #visualiseur d'images (display / eog)
 
 
 ###          FONCTIONNALITES            ###
-def msg(pb, penalite):
+def msg(pb, penalite=0, sep='', end='\n'):
     global NOTE
     global RETOUR
-    txt = "PROBLEME : " + pb + ". J'enleve " + str(round(penalite, 2)) + " points."
-    print(txt)
+    if penalite==0:
+        txt = pb
+    else:
+        txt = "PROBLEME : " + pb + ". J'enleve " + str(round(penalite, 2)) + " points."
+    print(txt,sep=sep,end=end)
     if NOTE > 0:
         NOTE = max(round(NOTE - penalite, 2), 0)
-    RETOUR = RETOUR + "\n" + txt
+    RETOUR = RETOUR + txt + end
 
 
 def isdir(thefile):
@@ -141,9 +144,9 @@ def isDepOk(f, filedates, filemodif):
     make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ok = isFiledatesOk(filedates, filemodif)
     if VERBOSE:
-        print('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
-        print("stdout:")
-        print(make_process.stdout.decode("utf-8", "ignore"))
+        msg('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
+        msg("stdout:")
+        msg(make_process.stdout.decode("utf-8", "ignore"))
     return ok
 
 
@@ -260,30 +263,30 @@ RETOUR = ""
 
 ###  VERIFICATION OS LINUX + VERSION PYTHON ###
 if platform != "linux" and platform != "linux2":
-    print("ERREUR : vous devez executer ce script sous Linux !")
+    msg("ERREUR : vous devez executer ce script sous Linux !")
     sys.exit(0)
 elif VERBOSE:
-    print("Plateforme = " + platform)
-    print("Verification Linux OK")
+    msg("Plateforme = " + platform)
+    msg("Verification Linux OK")
 
 version = sys.version_info
 if version[0] != 3 or (version[0] == 3 and version[1] < 5):  # minimum 3.5 pour subprocess.run() et glob recursif
-    print("ERREUR : vous devez executer ce script avec Python 3 (3.5 minimum) !")
+    msg("ERREUR : vous devez executer ce script avec Python 3 (3.5 minimum) !")
     sys.exit(0)
 elif VERBOSE:
-    print("Python version = " + sys.version)
-    print("Verification Python 3.5 minimum OK")
+    msg("Python version = " + sys.version)
+    msg("Verification Python 3.5 minimum OK")
 
 ###  VERIFICATION PARAMETRE DU SCRIPT = NOM ARCHIVE  ###
 if len(sys.argv) != 2:
-    print("ERREUR : lancez le script avec l'archive en parametre: " + sys.argv[0] + " NUM_ETU1_NUM_ETU2.tgz")
+    msg("ERREUR : lancez le script avec l'archive en parametre: " + sys.argv[0] + " NUM_ETU1_NUM_ETU2.tgz")
     sys.exit(0)
 
 ### IDENTIFICATION DES ETUDIANTS ET NOM D'ARCHIVE - PRISE EN COMPTE QUE L'ARCHIVE PEUT PROVENIR DE TOMUSS ###
 FILENAME = sys.argv[1]
 if VERBOSE:
-    print("FILENAME = " + FILENAME)
-    print("===> note initiale = " + str(NOTE))
+    msg("FILENAME = " + FILENAME)
+    msg("===> note initiale = " + str(NOTE))
 NUMEROS_ETU = []
 NOM_ARCHIVE_ATTENDU = ""
 
@@ -297,7 +300,7 @@ for mot in FILENAME_P_REPLACED.split(".")[0].split("_"):
         NOM_ARCHIVE_ATTENDU += mot
 
 if len(NUMEROS_ETU) == 0:
-    print("ERREUR : aucun numero d'etudiant detecte dans: " + FILENAME)
+    msg("ERREUR : aucun numero d'etudiant detecte dans: " + FILENAME)
     sys.exit(0)
 if not FILENAME_P_REPLACED.split(".")[0].endswith(NOM_ARCHIVE_ATTENDU):
     msg("L'archive  " + FILENAME + "  ne suit pas le format NUM_ETU1_NUM_ETU2_NUM_ETU3.tgz", 0.5)
@@ -306,12 +309,13 @@ if "#" in f:
     f = f.split("#")[1]
 NOM_ARCHIVE = f[f.find(NUMEROS_ETU[0][1:]) - 1] + NUMEROS_ETU[0][1:] + f.split(".")[0].split(NUMEROS_ETU[0][1:])[1]
 if VERBOSE:
-    print("NOM_ARCHIVE = " + NOM_ARCHIVE)
-    print("Numeros des etudiants =", end=' ')
-    print(*NUMEROS_ETU, sep=', ')
+    msg("NOM_ARCHIVE = " + NOM_ARCHIVE)
+    msg("Numeros des etudiants =", end=' ')
+    txtNUM_ETU = " , ".join(NUMEROS_ETU)
+    msg(txtNUM_ETU, end='\n')
 
 ###  EXTRACTION DE L'ARCHIVE  ###
-print("===> decompression de l'archive ...")
+msg("===> decompression de l'archive ...")
 tar = tarfile.open(FILENAME)
 #DIR = tar.members[0].name.split("/")[0]
 DIR = "aucun_repertoire_principal"
@@ -324,17 +328,17 @@ if DIR == "aucun_repertoire_principal":
         shutil.rmtree(DIR, ignore_errors=True)
     os.mkdir(DIR)
 if VERBOSE:
-    print("Repertoire principal = " + DIR)
+    msg("Repertoire principal = " + DIR)
 if DIR != NOM_ARCHIVE:
     msg("Nom de l'archive et du repertoire principal different", 0.25)
 tar.extractall()
 tar.close()
-print("===> decompression de l'archive ... done")
+msg("===> decompression de l'archive ... done")
 
 ###  VERIFICATION DE L'ARBORESCENCE  ###
-print("===> verification de l'arborescence ...")
+msg("===> verification de l'arborescence ...")
 if not isdir(DIR) or DIR == ".":
-    print("ERREUR : Repertoire principal inexistant")
+    msg("ERREUR : Repertoire principal inexistant")
     sys.exit(0)
 os.chdir(os.getcwd() + "/" + DIR)
 if not isdir("bin"):
@@ -345,9 +349,9 @@ if not isdir("doc"):
     msg("Dossier doc inexistant", 0.5)
 if not isdir("data"):
     msg("Dossier data inexistant", 0.5)
-print("===> verification de l'arborescence ... done")
+msg("===> verification de l'arborescence ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ### VERIFICATION DES FICHIERS PRESENTS/ABSENTS ###
 FICHIERSIND = {  # Fichiers attendus et indispensables
@@ -419,12 +423,12 @@ for f in FICHIERSPRESENTS:
     msg("Le fichier/dossier " + f["nc"] + " ne doit pas etre la", 0.1)
 if doclatex:
     msg("La documentation n'est pas demandee en latex", 0.1)
-print("===> verification des fichiers presents... done")
+msg("===> verification des fichiers presents... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  VERIFICATION MAKEFILE  ###
-print("===> verification Makefile ...")
+msg("===> verification Makefile ...")
 MAKEFILE = "Makefile"
 if not isfile(MAKEFILE):
     MAKEFILE = "makefile"
@@ -432,12 +436,12 @@ if not isfile(MAKEFILE):
         MAKEFILE = "???"
         msg("Makefile introuvable", 2)
 if VERBOSE:
-    print("Makefile = " + MAKEFILE)
-    print("==> note = " + str(NOTE))
-print("===> verification Makefile ... done")
+    msg("Makefile = " + MAKEFILE)
+    msg("==> note = " + str(NOTE))
+msg("===> verification Makefile ... done")
 
 ###  CLEAN  ###
-print("===> make clean ...")
+msg("===> make clean ...")
 if isfile(MAKEFILE):
     file_makefile = open(MAKEFILE, 'r')
     texte = file_makefile.read()
@@ -447,10 +451,10 @@ if isfile(MAKEFILE):
 
 make_process = subprocess.run(['make', 'clean'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 if VERBOSE:
-    print("stdout:")
-    print(make_process.stdout.decode("utf-8", "ignore"))
-    print("stderr:")
-    print(make_process.stderr.decode("utf-8", "ignore"))
+    msg("stdout:")
+    msg(make_process.stdout.decode("utf-8", "ignore"))
+    msg("stderr:")
+    msg(make_process.stderr.decode("utf-8", "ignore"))
 
 if isfile("bin/exemple") or isfile("./exemple"):
     msg("make clean ne supprime pas l'executable exemple", 0.1)
@@ -462,8 +466,9 @@ if isfile("bin/affichage") or isfile("./affichage"):
 # if len(glob.glob("obj/*.o")) != 0 or len(glob.glob("*.o")) != 0:
 if len(glob.glob("**/*.o", recursive=True)) != 0:
     msg("make clean ne supprime pas les fichiers objets", 0.5)
-    print("Fichiers objets non supprimes:", end=' ')
-    print(*glob.glob("**/*.o", recursive=True), sep=' , ')
+    msg("Fichiers objets non supprimes:", end=' ')
+    txt_fich_nonsup = " , ".join(glob.glob("**/*.o", recursive=True))
+    msg(txt_fich_nonsup)
 
 for f in glob.glob("**/*.o", recursive=True):
     os.remove(f)
@@ -471,33 +476,33 @@ for f in glob.glob('./exemple') + glob.glob('bin/exemple') + glob.glob('./test')
         './affichage') + glob.glob('bin/affichage'):
     os.remove(f)
 
-print("===> make clean  ... done")
+msg("===> make clean  ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  COMPILATION  ###
-print("===> make ...")
+msg("===> make ...")
 make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 warning = str(make_process.stderr).count("warning:")
 if VERBOSE:
-    print("stdout:")
-    print(make_process.stdout.decode("utf-8", "ignore"))
-    print("stderr:")
-    print(make_process.stderr.decode("utf-8", "ignore"))
+    msg("stdout:")
+    msg(make_process.stdout.decode("utf-8", "ignore"))
+    msg("stderr:")
+    msg(make_process.stderr.decode("utf-8", "ignore"))
 if warning > 0:
     msg("Il y a " + str(warning) + " warnings a la compilation", min(warning * 0.1, 0.5))
 elif VERBOSE:
-    print("Pas de warning a la compilation")
+    msg("Pas de warning a la compilation")
 
 error = str(make_process.stderr).count("error:")
 if error > 0:
     msg("Il y a " + str(error) + " erreurs a la compilation!", 1)
 elif VERBOSE:
-    print("Pas d'erreur a la compilation")
+    msg("Pas d'erreur a la compilation")
 
 if len(glob.glob("**/*.o", recursive=True)) != 5:
-    print("Attention : mauvais nombre de fichiers objets")
+    msg("Attention : mauvais nombre de fichiers objets")
 if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
     msg("Fichiers objets dans le mauvais repertoire", 0.5)
 
@@ -522,29 +527,29 @@ if not makedepok:
     msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
 
 if VERBOSE:
-    print("==> note = " + str(NOTE))
-print("===> make ... done")
+    msg("==> note = " + str(NOTE))
+msg("===> make ... done")
 
 ###  EXECUTION EXE  ###
 ## EXEMPLE ##
-print("===> bin/exemple ...")
+msg("===> bin/exemple ...")
 
 if not isfile("bin/exemple"):
     msg("make ne genere pas bin/exemple", 0.5)
 if VERBOSE and isfile("data/image1.ppm"):
-    print("image1.ppm existe, suppression")
+    msg("image1.ppm existe, suppression")
     os.remove("data/image1.ppm")
 if VERBOSE and isfile("data/image2.ppm"):
-    print("image2.ppm existe, suppression")
+    msg("image2.ppm existe, suppression")
     os.remove("data/image2.ppm")
 
 if isfile("bin/exemple"):
     make_process = subprocess.run(['bin/exemple'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
-        print("stdout:")
-        print(make_process.stdout.decode("utf-8", "ignore"))
-        print("stderr:")
-        print(make_process.stderr.decode("utf-8", "ignore"))
+        msg("stdout:")
+        msg(make_process.stdout.decode("utf-8", "ignore"))
+        msg("stderr:")
+        msg(make_process.stderr.decode("utf-8", "ignore"))
 
 if not isfile("data/image1.ppm"):
     msg("image1.ppm non generee (ou pas dans data)", 0.5)
@@ -556,7 +561,7 @@ elif isfile("../image1.ppm"):
     if image_etu != image_prof:
         msg("image1.ppm erronee", 0.25)
     elif VERBOSE:
-        print("image1.ppm OK")
+        msg("image1.ppm OK")
     im_file_prof.close()
     im_file_etu.close()
 else:
@@ -573,34 +578,34 @@ elif isfile("../image2.ppm"):
     if image_etu != image_prof:
         msg("image2.ppm erronee", 0.25)
     elif VERBOSE:
-        print("image2.ppm OK")
+        msg("image2.ppm OK")
     im_file_prof.close()
     im_file_etu.close()
 else:
     make_process = subprocess.run([VIEWER, 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     utilisateurEvalue('image2 ok', 'image2.ppm erronee', 0.5)
 
-print("===> bin/exemple ... done")
+msg("===> bin/exemple ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ## test ##
-print("===> bin/test ...")
+msg("===> bin/test ...")
 if not isfile("bin/test"):
     msg("make ne genere pas bin/test", 0.5)
 else:
     make_process = subprocess.run(['bin/test'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
-        print("stdout:")
-        print(make_process.stdout.decode("utf-8", "ignore"))
-        print("stderr:")
-        print(make_process.stderr.decode("utf-8", "ignore"))
+        msg("stdout:")
+        msg(make_process.stdout.decode("utf-8", "ignore"))
+        msg("stderr:")
+        msg(make_process.stderr.decode("utf-8", "ignore"))
     if make_process.stderr.decode("utf-8", "ignore").find("Assertion") != -1:
         msg("Arret de bin/test non prevu : echec d'une assertion", 0.25)
 
 if isfile("../mainTestRegression.cpp"):
     if VERBOSE:
-        print("Test de regression ...")
+        msg("Test de regression ...")
     replaceInFile('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
     subprocess.run(['cp', '../mainTestRegression.cpp', 'src/mainTestRegression.cpp'])
     subprocess.run(
@@ -616,22 +621,22 @@ if isfile("../mainTestRegression.cpp"):
     else:
         make_process = subprocess.run(['bin/testRegression'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if VERBOSE:
-            print("stdout:")
-            print(make_process.stdout.decode("utf-8", "ignore"))
-            print("stderr:")
-            print(make_process.stderr.decode("utf-8", "ignore"))
+            msg("stdout:")
+            msg(make_process.stdout.decode("utf-8", "ignore"))
+            msg("stderr:")
+            msg(make_process.stderr.decode("utf-8", "ignore"))
         errors = make_process.stdout.decode("utf-8", "ignore")
         nb_errors = errors.count("ERREUR")
         if nb_errors > 0:
             msg("Il y a " + str(nb_errors) + " erreurs dans les tests de regression prof", min(nb_errors * 0.1, 0.5))
         if VERBOSE:
-            print("Test de regression ... done")
+            msg("Test de regression ... done")
 
-print("===> bin/test ... done")
+msg("===> bin/test ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
-print("===> valgrind sur bin/test ...")
+msg("===> valgrind sur bin/test ...")
 #if isfile("bin/test"):
 if not isfile("bin/test"):
     msg("executable bin/test absent, test valgrind sur bin/test impossible", 1.5)
@@ -639,10 +644,10 @@ else:
     make_process = subprocess.run(['valgrind', '--tool=memcheck', '--leak-check=summary', 'bin/test'],
                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if VERBOSE:
-        print("stdout:")
-        print(make_process.stdout.decode("utf-8", "ignore"))
-        print("stderr:")
-        print(make_process.stderr.decode("utf-8", "ignore"))
+        msg("stdout:")
+        msg(make_process.stdout.decode("utf-8", "ignore"))
+        msg("stderr:")
+        msg(make_process.stderr.decode("utf-8", "ignore"))
     str_stderr = make_process.stderr.decode("utf-8", "ignore")
     istart = int(str_stderr.find("definitely lost: "))
     #iend = int(str_stderr.find("bytes", istart))
@@ -672,16 +677,16 @@ else:
         leak_sum = leak_sum[int(leak_sum.find("==",20)):]
 
     if VERBOSE:
-        print("Nombre de bytes perdus : " + str(nb_bytes_lost))
+        msg("Nombre de bytes perdus : " + str(nb_bytes_lost))
     if nb_bytes_lost > 0:
         msg("Il y a " + str(nb_bytes_lost) + " octets perdus", min(nb_bytes_lost * 0.01, 0.5))
     elif VERBOSE:
-        print("Aucune fuite memoire")
+        msg("Aucune fuite memoire")
 
     nb_invalid_write = str_stderr.count("Invalid write")
     nb_invalid_read = str_stderr.count("Invalid read")
     if VERBOSE:
-        print("Nombre d'acces invalides : " + str(nb_invalid_write + nb_invalid_read))
+        msg("Nombre d'acces invalides : " + str(nb_invalid_write + nb_invalid_read))
     if nb_invalid_write > 0:
         msg("Il y a " + str(nb_invalid_write) + " acces invalides en ecriture a la memoire",
             min(nb_invalid_write * 0.1, 0.5))
@@ -689,39 +694,39 @@ else:
         msg("Il y a " + str(nb_invalid_read) + " acces invalides en lecture a la memoire",
             min(nb_invalid_read * 0.1, 0.5))
 
-print("===> valgrind sur bin/test ... done")
+msg("===> valgrind sur bin/test ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ## affichage ##
-print("===> bin/affichage ...")
+msg("===> bin/affichage ...")
 if not isfile("bin/affichage"):
     msg("make ne genere pas bin/affichage", 0.5)
 else:
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['bin/affichage'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if VERBOSE:
-            print("stdout:")
-            print(make_process.stdout.decode("utf-8", "ignore"))
-            print("stderr:")
-            print(make_process.stderr.decode("utf-8", "ignore"))
+            msg("stdout:")
+            msg(make_process.stdout.decode("utf-8", "ignore"))
+            msg("stderr:")
+            msg(make_process.stderr.decode("utf-8", "ignore"))
         utilisateurEvalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
             #echelle d'appreciations ech3: n (non/insuffisant), m (moyen), o (oui/bien)
         utilisateurEvalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
         # TODO : else: automatiser la verif de bin/affichage
 
-print("===> bin/affichage ... done")
+msg("===> bin/affichage ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  README  ###
-print("===> readme ...")
+msg("===> readme ...")
 readmes = ["readme.txt", "Readme.txt", "README.txt", "readme.md", "Readme.md", "README.md"]
 readme = filein(readmes)
 if readme != "":
     longueur = filesize(readme)
     if VERBOSE:
-        print("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
+        msg("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['gedit', readme], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         utilisateurEvalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
@@ -731,12 +736,12 @@ if readme != "":
 else:
     msg("readme introuvable", 0.5)
 
-print("===> readme ... done")
+msg("===> readme ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  DOCUMENTATION  ###
-print("===> documentation ...")
+msg("===> documentation ...")
 doxys = ["doc/image.doxy", "doc/doxyfile"]
 doxy = filein(doxys)
 if doxy != "":
@@ -763,19 +768,19 @@ for f in files_h:
     n_brief += countInFile(f, "brief")
     n_param += countInFile(f, "param")
 if VERBOSE:
-    print("Nombre de fonctions commentees : " + str(n_brief))
-    print("Nombre de parametres commentes : " + str(n_param))
+    msg("Nombre de fonctions commentees : " + str(n_brief))
+    msg("Nombre de parametres commentes : " + str(n_param))
 if n_brief < 20:
     msg("Pas assez de fonctions commentees", 0.25)
 if n_param < 15:
     msg("Pas assez de parametres commentees", 0.25)
 
-print("===> documentation ... done")
+msg("===> documentation ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  ASSERTIONS  ###
-print("===> assert ...")
+msg("===> assert ...")
 search = ["assert(", "assert (", "throw"]
 files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.cpp", "src/Image.cpp", "src/pixel.cpp",
          "src/Pixel.cpp"]
@@ -784,15 +789,15 @@ for f in files:
     for s in search:
         n += countInFile(f, s)
 if VERBOSE:
-    print("Nombre d'assertions : " + str(n))
+    msg("Nombre d'assertions : " + str(n))
 if n < 10:
     msg("Pas assez d'assertions", 0.5)
-print("===> assert ... done")
+msg("===> assert ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  CODE  ###
-print("===> code ...")
+msg("===> code ...")
 if MODE == "FULLAUTO" or MODE == "PERSO":
     ## Pixel.h ##
     files = ["src/Pixel.h", "src/pixel.h"]
@@ -858,16 +863,15 @@ else:
     if points > 0:
         msg("Erreurs dans le code", points)
 
-print("===> code ... done")
+msg("===> code ... done")
 if VERBOSE:
-    print("==> note = " + str(NOTE))
+    msg("==> note = " + str(NOTE))
 
 ###  RESUME  ###
-print("\nBILAN\n=====")
-print(RETOUR)
-print("Les etudiants ayant comme numeros : ", end='')
-print(*NUMEROS_ETU, sep=' , ', end=' ')
-print("ont la note " + str(NOTE) + "\n")
+msg("\nLes etudiants ayant comme numeros : ", end='')
+txt_numetu = " , ".join(NUMEROS_ETU)
+msg(txt_numetu, end=' ')
+msg("ont la note " + str(NOTE) + "\n")
 
 ###  FICHIERS FEEDBACK ET NOTES  ###
 if isfile("../mainTestRegression.cpp"): #mode prof
