@@ -354,23 +354,26 @@ if VERBOSE:
     msg("==> note = " + str(NOTE))
 
 ### VERIFICATION DES FICHIERS PRESENTS/ABSENTS ###
-FICHIERSDEPMAKEFILE = {  # Fichiers indispensables au test des dependances du Makefile
+FICHIERSATTENDUS = {
+    # Fichiers attendus
     "Pixel.h": {"nom": "Pixel", "ext": "h", "loc": "src"},
     "Pixel.cpp": {"nom": "Pixel", "ext": "cpp", "loc": "src"},
     "Image.h": {"nom": "Image", "ext": "h", "loc": "src"},
     "Image.cpp": {"nom": "Image", "ext": "cpp", "loc": "src"},
-    "mainTest.cpp": {"nom": "mainTest", "ext": "cpp", "loc": "src"}
-}
-FICHIERSATTENDUS = {
-    # Autres fichiers attendus ou qui peuvent etre presents (fichiers generes ou dont l'absence est traitee plus loin)
+    "mainTest.cpp": {"nom": "mainTest", "ext": "cpp", "loc": "src"},
     "mainExemple.cpp": {"nom": "mainExemple", "ext": "cpp", "loc": "src"},
     "mainAffichage.cpp": {"nom": "mainAffichage", "ext": "cpp", "loc": "src"},
     "image.doxy": {"nom": "image", "ext": "doxy", "loc": "doc"},
+    # Fichiers generes qui peuvent etre presents
     "test": {"nom": "test", "ext": "", "loc": "bin"},
     "exemple": {"nom": "exemple", "ext": "", "loc": "bin"},
     "affichage": {"nom": "affichage", "ext": "", "loc": "bin"},
     "image1.ppm": {"nom": "image1", "ext": "ppm", "loc": "data"},
-    "image2.ppm": {"nom": "image2", "ext": "ppm", "loc": "data"}
+    "image2.ppm": {"nom": "image2", "ext": "ppm", "loc": "data"},
+    # Fichiers qui peuvent etre presents en cas de reexecution du script sans suppression de l'archive decompressee
+    "testRegression": {"nom": "testRegression", "ext": "", "loc": "bin"},
+    "mainTestRegression.cpp": {"nom": "mainTestRegression", "ext": "cpp", "loc": "src"},
+    "ImageRegression.h": {"nom": "ImageRegression", "ext": "h", "loc": "src"}
 }
 FICHIERSPRESENTS = listfiles(".")
 doclatex = False
@@ -397,8 +400,6 @@ for f in FICHIERSPRESENTS:
     if f["nom"].lower() == "makefile":
         continue
     if f["nom"].lower() == "readme":
-        continue
-    if f["nc"] in FICHIERSDEPMAKEFILE:
         continue
     if f["nc"] in FICHIERSATTENDUS:
         continue
@@ -493,17 +494,8 @@ if len(glob.glob("**/*.o", recursive=True)) != 5:
 if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
     msg("Fichiers objets dans le mauvais repertoire", 0.5)
 
-touspresents = True
-for nc, prop in FICHIERSDEPMAKEFILE.items():
-    present = False
-    for f in FICHIERSPRESENTS:
-        if f["nc"] == nc:
-            present = True
-            break
-    if not present:
-        touspresents = False
-        break
-if touspresents:
+if isfile("src/Pixel.h") and isfile("src/Pixel.cpp") and isfile("src/Image.h") and isfile("src/Image.cpp") \
+    and isfile("src/mainTest.cpp"):
     makedepok = True
     filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
     isFiledatesOk(filedates, {})
@@ -525,7 +517,7 @@ if touspresents:
         msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
 else:
     msg(
-        "Pixel.h, Pixel.cpp, Image.h, Image.cpp et mainTest.cpp doivent etre presents pour verifier les dependances du Makefile",
+        "src/Pixel.h, src/Pixel.cpp, src/Image.h, src/Image.cpp, src/mainTest.cpp absents, test dependances Makefile impossible",
         0.25)
 
 if VERBOSE:
@@ -652,32 +644,13 @@ else:
         msg(make_process.stderr.decode("utf-8", "ignore"))
     str_stderr = make_process.stderr.decode("utf-8", "ignore")
     istart = int(str_stderr.find("definitely lost: "))
-    #iend = int(str_stderr.find("bytes", istart))
-    iend = int(str_stderr.find("suppressed:", istart))
+    iend = int(str_stderr.find("bytes", istart))
     nb_bytes_lost = 0
     if istart == -1 and iend == -1:
         if str_stderr.find("All heap blocks were fread") != -1:
             msg("Fuite memoire sur la pile", 0.5)
     else:
-        #nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
-        nb_bytes_lost = 0
-        leak_sum = str_stderr[istart:iend+60]
-        nb_bytes_lost += int(
-            leak_sum[int(leak_sum.find("definitely lost: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
-        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
-        nb_bytes_lost += int(
-            leak_sum[int(leak_sum.find("indirectly lost: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
-        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
-        nb_bytes_lost += int(
-            leak_sum[int(leak_sum.find("possibly lost: ")) + 15:int(leak_sum.find("bytes"))].replace(',', ''))
-        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
-        nb_bytes_lost += int(
-            leak_sum[int(leak_sum.find("still reachable: ")) + 17:int(leak_sum.find("bytes"))].replace(',', ''))
-        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
-        nb_bytes_lost += int(
-            leak_sum[int(leak_sum.find("suppressed: ")) + 12:int(leak_sum.find("bytes"))].replace(',', ''))
-        leak_sum = leak_sum[int(leak_sum.find("==",20)):]
-
+        nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
     if VERBOSE:
         msg("Nombre de bytes perdus : " + str(nb_bytes_lost))
     if nb_bytes_lost > 0:
@@ -703,7 +676,7 @@ if VERBOSE:
 ## affichage ##
 msg("===> bin/affichage ...")
 if not isfile("bin/affichage"):
-    msg("make ne genere pas bin/affichage", 0.5)
+    msg("make ne genere pas bin/affichage", 0.75)
 else:
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['bin/affichage'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -802,6 +775,8 @@ if VERBOSE:
 msg("===> code ...")
 if MODE == "FULLAUTO" or MODE == "PERSO":
     ## Pixel.h ##
+    if not(isfile("src/Pixel.h") or isfile("src/pixel.h")):
+        msg("src/Pixel.h absent, test code Pixel.h impossible", 0.25)
     files = ["src/Pixel.h", "src/pixel.h"]
     for f in files:
         if isfile(f):
@@ -813,6 +788,8 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
                 msg("Mauvais type des donnees membres de Pixel", 0.25)
             fi.close()
     ## Image.h ##
+    if not(isfile("src/Image.h") or isfile("src/image.h")):
+        msg("src/Image.h absent, test code Image.h impossible", 3)
     files = ["src/Image.h", "src/image.h"]
     for f in files:
         if isfile(f):
