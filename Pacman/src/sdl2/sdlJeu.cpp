@@ -40,7 +40,7 @@ void Image::loadFromFile (const char* filename, SDL_Renderer * renderer) {
     SDL_FreeSurface(surface);
     surface = surfaceCorrectPixelFormat;
 
-    texture = SDL_CreateTextureFromSurface(renderer,surface);
+    texture = SDL_CreateTextureFromSurface(renderer,surfaceCorrectPixelFormat);
     if (texture == NULL) {
         cout << "Error: problem to create the texture of "<< filename<< endl;
         exit(1);
@@ -76,6 +76,15 @@ void Image::draw (SDL_Renderer * renderer, int x, int y, int w, int h) {
 SDL_Texture * Image::getTexture() const {return texture;}
 
 void Image::setSurface(SDL_Surface * surf) {surface = surf;}
+
+
+
+
+
+
+
+
+
 
 // ============= CLASS SDLJEU =============== //
 
@@ -152,7 +161,7 @@ sdlJeu::~sdlJeu () {
 }
 
 void sdlJeu::sdlAff () {
-	//Remplir l'écran de blanc
+	//Remplir l'ï¿½cran de blanc
     SDL_SetRenderDrawColor(renderer, 230, 240, 255, 255);
     SDL_RenderClear(renderer);
 
@@ -197,7 +206,7 @@ void sdlJeu::sdlBoucle () {
             t = nt;
         }
 
-		// tant qu'il y a des evenements à traiter (cette boucle n'est pas bloquante)
+		// tant qu'il y a des evenements ï¿½ traiter (cette boucle n'est pas bloquante)
 		while (SDL_PollEvent(&events)) {
 			if (events.type == SDL_QUIT) quit = true;           // Si l'utilisateur a clique sur la croix de fermeture
 			else if (events.type == SDL_KEYDOWN) {              // Si une touche est enfoncee
@@ -226,7 +235,7 @@ void sdlJeu::sdlBoucle () {
 			}
 		}
 
-		// on affiche le jeu sur le buffer caché
+		// on affiche le jeu sur le buffer cachï¿½
 		sdlAff();
 
 		// on permute les deux buffers (cette fonction ne doit se faire qu'une seule fois dans la boucle)

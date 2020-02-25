@@ -17,7 +17,7 @@ class PacmanGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit PacmanGraphicsScene(QObject *parent = 0);
+    explicit PacmanGraphicsScene(QObject *parent = nullptr);
 
     const Jeu& jeu() const { return m_jeu; }
     int sprite_size() const { return m_sprite_size; }
@@ -41,7 +41,7 @@ class PacmanGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 public:
-    explicit PacmanGraphicsView(QWidget *parent = NULL);
+    explicit PacmanGraphicsView(QWidget *parent = nullptr);
 
     void drawBackground(QPainter *painter, const QRectF &rect) override;
 

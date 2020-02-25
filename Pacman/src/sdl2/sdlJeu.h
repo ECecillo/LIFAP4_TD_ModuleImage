@@ -52,7 +52,8 @@ private :
     Image im_pastille;
     Image im_fantome;
 
-
+    bool souris;
+    bool touche;
 public :
 
     sdlJeu ();

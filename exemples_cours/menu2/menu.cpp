@@ -53,7 +53,7 @@ int Menu::question()
 void Menu::loop()
 {
 	int cm;
-	while(1)
+	while(true)
 	{
 		afficher();
 		cm = question();

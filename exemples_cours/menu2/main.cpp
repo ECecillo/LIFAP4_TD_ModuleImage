@@ -5,8 +5,13 @@
 
 #include "menu.h"
 
+class Camion
+{
+	int a;
+	void calcul() {}
+};
 
-void truc1()
+void truc1(Camion& c)
 {
 	printf("fonction truc1\n");
 	fflush(stdout);
