@@ -102,7 +102,7 @@ def filein(lst):
     return read
 
 
-def countInFile(f, word):
+def count_in_file(f, word):
     if isfile(f):
         with open(f, 'r', errors='ignore') as fs:
             texte = fs.read()
@@ -113,7 +113,7 @@ def countInFile(f, word):
         return 0
 
 
-def replaceInFile(fin, fout, wordin, wordout):
+def replace_in_file(fin, fout, wordin, wordout):
     if isfile(fin):
         texte = ''
         with open(fin, 'r', errors='ignore') as fs:
@@ -125,7 +125,7 @@ def replaceInFile(fin, fout, wordin, wordout):
             fs.close()
 
 
-def isFiledatesOk(filedates, filemodif):
+def is_filedates_ok(filedates, filemodif):
     ok = True
     for f, lm in filedates.items():
         if isfile(f):
@@ -137,12 +137,12 @@ def isFiledatesOk(filedates, filemodif):
     return ok
 
 
-def isDepOk(f, filedates, filemodif):
+def is_dep_ok(f, filedates, filemodif):
     global VERBOSE
     if isfile(f):
         os.utime(f)
     make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    ok = isFiledatesOk(filedates, filemodif)
+    ok = is_filedates_ok(filedates, filemodif)
     if VERBOSE:
         msg('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
         msg("stdout:")
@@ -150,15 +150,25 @@ def isDepOk(f, filedates, filemodif):
     return ok
 
 
-def replaceAll(text, dic):
+def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
     return text
 
 
-def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
+def utilisateur_demande(msgInvit, info):
+    preced = persiste_arch_val(info, 'rstr')
+    reponse = ''
+    while reponse == '':
+        reponse = input(msgInvit + ' ? (precedemment:' + preced + ')')
+        if reponse == '' and preced != 'None' and preced != '':
+            reponse = preced
+    persiste_arch_val(info, 'w', reponse)
+    return reponse
+
+def utilisateur_evalue(msgInvit, msgPb, penalite, echelle='oui/non'):
     # echelle predefinie dans la liste ci-dessous,
-    # ou echelle personnalisee, e.g., utilisateurEvalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
+    # ou echelle personnalisee, e.g., utilisateur_evalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
     # l'utilisateur peut falcutativement ajouter un commentaire en le separant de l'appreciation avec '#'
     # par exemple : ...$ readme ok (n/n+/m-/m/m+/o-/o) ? o-#manquent les noms et numeros d'etudiants
     echelles = {
@@ -171,8 +181,11 @@ def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
         ech = echelle
     evaluation = ''
     while evaluation not in ech:
+        preced = persiste_arch_val(msgInvit, 'rstr')
         reponse = input(msgInvit + ' (' + '/'.join(ech) + ') ? (precedemment:'
-                        + persisteArchVal(msgInvit, 'rstr') + ') ')
+            + preced + ') ')
+        if reponse == '' and preced != 'None' and preced != '':
+            reponse = preced
         message = msgPb
         evaluation = reponse
         if '#' in reponse:
@@ -181,18 +194,19 @@ def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
         if evaluation in ech[0:-1]:
             msg(message, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
         if evaluation in ech:
-            persisteArchVal(msgInvit, 'w', reponse)
+            persiste_arch_val(msgInvit, 'w', reponse)
 
 
-def persisteArchVal(champ_in, action='r', valeur_in=None):
+def persiste_arch_val(champ_in, action='r', valeur_in=None):
     champs = ['nomArchive', 'nomFichier', 'numsEtu', 'repPrinc', 'note',
-              'image1 ok', 'image2 ok', 'affichage image ok', 'zoom/dezoom ok', 'readme ok']
-    return persisteValeur('../eval_archives.csv', champs, NOM_ARCHIVE, champ_in, action, valeur_in)
+        'image1 ok', 'image2 ok', 'affichage image ok', 'zoom/dezoom ok', 'readme ok', 'erreurs code penalite', 'erreurs code detail']
+    return persiste_valeur('../eval_archives.csv', champs, NOM_ARCHIVE, champ_in, action, valeur_in)
 
 
-def persisteEtuVal(num_etu, champ_in='note', action='w', valeur_in=None):
+
+def persiste_etu_val(num_etu, champ_in='note', action='w', valeur_in=None):
     champs = ['numEtu', 'note']
-    return persisteValeur('../eval_etudiants.csv', champs, num_etu, champ_in, action, valeur_in)
+    return persiste_valeur('../eval_etudiants.csv', champs, num_etu, champ_in, action, valeur_in)
 
 
 # persite dans le fichier csv 'nom_fichier' pour la ligne identifiee par la clef 'clef'
@@ -201,7 +215,7 @@ def persisteEtuVal(num_etu, champ_in='note', action='w', valeur_in=None):
 # le fichier csv est editable avec un tableur type Excel avec separateur=tabulation
 # parametre 'action' : 'r' lire la valeur du champ, 'rstr' lire+convertir en chaîne, 'w' mettre a jour
 # meme si fichier ou ligne absente, toute action creee le fichier et la ligne (avec des valeurs vides)
-def persisteValeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=None):
+def persiste_valeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=None):
     if champ_in not in champs:
         raise (Exception('ERREUR : champ "' + champ_in
                          + '" non present parmi les champs du fichier csv ' + nom_fichier))
@@ -290,7 +304,7 @@ NUMEROS_ETU = []
 NOM_ARCHIVE_ATTENDU = ""
 
 replaceP = {"p": "1", "P": "1"}
-FILENAME_P_REPLACED = replaceAll(FILENAME, replaceP)
+FILENAME_P_REPLACED = replace_all(FILENAME, replaceP)
 for mot in FILENAME_P_REPLACED.split(".")[0].split("_"):
     if mot.isdigit() and len(mot) == 8:
         NUMEROS_ETU.append(mot)
@@ -497,23 +511,23 @@ if isfile("src/Pixel.h") and isfile("src/Pixel.cpp") and isfile("src/Image.h") a
         and isfile("src/mainTest.cpp"):
     makedepok = True
     filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
-    isFiledatesOk(filedates, {})
-    makedepok = isDepOk('src/mainTest.cpp', filedates,
+    is_filedates_ok(filedates, {})
+    makedepok = is_dep_ok('src/mainTest.cpp', filedates,
                         {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
                          'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
+    makedepok = is_dep_ok('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
                                                      'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Image.h', filedates,
+    makedepok = is_dep_ok('src/Image.h', filedates,
                         {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True,
                          'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
+    makedepok = is_dep_ok('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
                                                      'bin/test': True}) and makedepok
-    makedepok = (isDepOk('src/Pixel.h', filedates,
+    makedepok = (is_dep_ok('src/Pixel.h', filedates,
                          {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
-                 isDepOk('src/Pixel.h', filedates,
+                 is_dep_ok('src/Pixel.h', filedates,
                          {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True,
                           'bin/test': True})) and makedepok
-    makedepok = isDepOk('aucun_fichier', filedates,
+    makedepok = is_dep_ok('aucun_fichier', filedates,
                         {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
                          'bin/test': False}) and makedepok
     if not makedepok:
@@ -563,7 +577,7 @@ elif isfile("../image1.ppm"):
     im_file_etu.close()
 else:
     make_process = subprocess.run([VIEWER, 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    utilisateurEvalue('image1 ok', 'image1.ppm erronee', 0.5)
+    utilisateur_evalue('image1 ok', 'image1.ppm erronee', 0.5)
 
 if not isfile("data/image2.ppm"):
     msg("image2.ppm non generee (ou pas dans data)", 0.5)
@@ -580,7 +594,7 @@ elif isfile("../image2.ppm"):
     im_file_etu.close()
 else:
     make_process = subprocess.run([VIEWER, 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    utilisateurEvalue('image2 ok', 'image2.ppm erronee', 0.5)
+    utilisateur_evalue('image2 ok', 'image2.ppm erronee', 0.5)
 
 msg("===> bin/exemple ... done")
 if VERBOSE:
@@ -603,7 +617,7 @@ else:
 if isfile("../mainTestRegression.cpp"):
     if VERBOSE:
         msg("Test de regression ...")
-    replaceInFile('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
+    replace_in_file('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
     subprocess.run(['cp', '../mainTestRegression.cpp', 'src/mainTestRegression.cpp'])
     subprocess.run(
         ['g++', '-ggdb', '-std=c++11', '-c', 'src/mainTestRegression.cpp', '-I/usr/include/SDL2', '-o',
@@ -688,9 +702,9 @@ else:
             msg(make_process.stdout.decode("utf-8", "ignore"))
             msg("stderr:")
             msg(make_process.stderr.decode("utf-8", "ignore"))
-        utilisateurEvalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
+        utilisateur_evalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
         # echelle d'appreciations ech3: n (non/insuffisant), m (moyen), o (oui/bien)
-        utilisateurEvalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
+        utilisateur_evalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
         # TODO : else: automatiser la verif de bin/affichage
 
 msg("===> bin/affichage ... done")
@@ -707,7 +721,7 @@ if readme != "":
         msg("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['gedit', readme], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        utilisateurEvalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
+        utilisateur_evalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
         # echelle d'appreciations ech7: n (non/insuffisant), n+, m-, m (moyen), m+, o-, o (oui/bien)
     elif longueur < 500:
         msg(readme + " pas assez detaille", 0.5)
@@ -743,8 +757,8 @@ files_h = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h"]
 n_brief = 0
 n_param = 0
 for f in files_h:
-    n_brief += countInFile(f, "brief")
-    n_param += countInFile(f, "param")
+    n_brief += count_in_file(f, "brief")
+    n_param += count_in_file(f, "param")
 if VERBOSE:
     msg("Nombre de fonctions commentees : " + str(n_brief))
     msg("Nombre de parametres commentes : " + str(n_param))
@@ -765,7 +779,7 @@ files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.
 n = 0
 for f in files:
     for s in search:
-        n += countInFile(f, s)
+        n += count_in_file(f, s)
 if VERBOSE:
     msg("Nombre d'assertions : " + str(n))
 if n < 10:
@@ -915,11 +929,12 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
 command = ['gedit']
 command.extend(glob.glob("src/*.*"))
 make_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-print("Commentaires sur le code : ")
-commentaires = input()
-points = min(float(input('Nombre de points a deduire ? ')), 3.0)
+reponse = utilisateur_demande('Problemes dans le code, nombre de points a deduire (limite a trois points) ', 'erreurs code penalite')
+points = min(float(reponse), 3)
 if points > 0:
-    msg('Erreurs dans le code : ' + commentaires, points)
+    reponse = utilisateur_demande('Problemes dans le code, commentaires', 'erreurs code detail')
+    msg('' + reponse + '\n' + 'Problemes dans le code', points)
+
 msg("===> code ... done")
 if VERBOSE:
     msg("==> note = " + str(NOTE))
@@ -954,13 +969,16 @@ if isfile("../mainTestRegression.cpp"):  # mode prof
             foutput.write(str(etu) + " " + str(NOTE) + "\n")
         foutput.close()
 
-    persisteArchVal('nomFichier', 'w', FILENAME)
-    persisteArchVal('numsEtu', 'w', '#'.join(NUMEROS_ETU))
-    persisteArchVal('repPrinc', 'w', DIR)
-    persisteArchVal('note', 'w', NOTE)
+    persiste_arch_val('nomFichier', 'w', FILENAME)
+    persiste_arch_val('numsEtu', 'w', '#'.join(NUMEROS_ETU))
+    persiste_arch_val('repPrinc', 'w', DIR)
+    persiste_arch_val('note', 'w', NOTE)
 
     for etu in NUMEROS_ETU:
-        persisteEtuVal(etu, 'note', 'w', NOTE)
+        persiste_etu_val(etu, 'note', 'w', NOTE)
 
 print("-----------------------FIN DU SCRIPT--------------------------")
 input('Appuyer sur Entree pour quitter...')
+
+
+
