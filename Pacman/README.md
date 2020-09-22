@@ -39,6 +39,8 @@ Pacman/pacman.cbp : fichier de projet pour compiler avec Codeblocks.
 
 Pacman/Pacman_qt.pro : le projet Qt. 
 
+Pacman/pacman.code-workspace : fichier d'environnement de Visual Code. A ouvrir pour compiler avec Visual Code.
+
 
 Pour la documentation du code, voir la rubrique "documentation du code" plus bas.
 
@@ -63,6 +65,10 @@ Pour Windows, le répertoire extern contient une version précompilé de SDL2 po
 ``` make -f Makefile_txt_sdl ```
 
 Editer le fichier Makefile pour choisir votre plateforme entre texte ou SDL !
+
+
+### Version Texte/SDL2 avec VisualCode
+en chantier ... je regarde, je regarde ... il y a déjà le pacman.code-workspace
 
 
 ### Version Texte/SDL2 sous Linux/Windows/Windows-WSL avec Codeblocks : bien testé, devrait marcher
