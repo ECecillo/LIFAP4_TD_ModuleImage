@@ -33,6 +33,7 @@ void Image::loadFromFile (const char* filename, SDL_Renderer * renderer) {
     }
     if (surface == NULL) {
         cout<<"Error: cannot load "<< filename <<endl;
+        SDL_Quit();
         exit(1);
     }
 
@@ -43,6 +44,7 @@ void Image::loadFromFile (const char* filename, SDL_Renderer * renderer) {
     texture = SDL_CreateTextureFromSurface(renderer,surfaceCorrectPixelFormat);
     if (texture == NULL) {
         cout << "Error: problem to create the texture of "<< filename<< endl;
+        SDL_Quit();
         exit(1);
     }
 }
@@ -51,6 +53,7 @@ void Image::loadFromCurrentSurface (SDL_Renderer * renderer) {
     texture = SDL_CreateTextureFromSurface(renderer,surface);
     if (texture == NULL) {
         cout << "Error: problem to create the texture from surface " << endl;
+        SDL_Quit();
         exit(1);
     }
 }
@@ -91,16 +94,22 @@ void Image::setSurface(SDL_Surface * surf) {surface = surf;}
 sdlJeu::sdlJeu () : jeu() {
     // Initialisation de la SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        cout << "Erreur lors de l'initialisation de la SDL : " << SDL_GetError() << endl;SDL_Quit();exit(1);
+        cout << "Erreur lors de l'initialisation de la SDL : " << SDL_GetError() << endl;
+        SDL_Quit();
+        exit(1);
     }
 
     if (TTF_Init() != 0) {
-        cout << "Erreur lors de l'initialisation de la SDL_ttf : " << TTF_GetError() << endl;SDL_Quit();exit(1);
+        cout << "Erreur lors de l'initialisation de la SDL_ttf : " << TTF_GetError() << endl;
+        SDL_Quit();
+        exit(1);
     }
 
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     if( !(IMG_Init(imgFlags) & imgFlags)) {
-        cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << endl;SDL_Quit();exit(1);
+        cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << endl;
+        SDL_Quit();
+        exit(1);
     }
 
     if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
@@ -121,7 +130,9 @@ sdlJeu::sdlJeu () : jeu() {
     // Creation de la fenetre
     window = SDL_CreateWindow("Pacman", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dimx, dimy, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
-        cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << endl; SDL_Quit(); exit(1);
+        cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << endl; 
+        SDL_Quit(); 
+        exit(1);
     }
 
     renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
@@ -134,8 +145,12 @@ sdlJeu::sdlJeu () : jeu() {
 
     // FONTS
     font = TTF_OpenFont("data/DejaVuSansCondensed.ttf",50);
+    if (font == NULL)
+        font = TTF_OpenFont("../data/DejaVuSansCondensed.ttf",50);
     if (font == NULL) {
-            cout << "Failed to load DejaVuSansCondensed.ttf! SDL_TTF Error: " << TTF_GetError() << endl; SDL_Quit(); exit(1);
+            cout << "Failed to load DejaVuSansCondensed.ttf! SDL_TTF Error: " << TTF_GetError() << endl; 
+            SDL_Quit(); 
+            exit(1);
 	}
 	font_color.r = 50;font_color.g = 50;font_color.b = 255;
 	font_im.setSurface(TTF_RenderText_Solid(font,"Pacman",font_color));
@@ -145,8 +160,12 @@ sdlJeu::sdlJeu () : jeu() {
     if (withSound)
     {
         sound = Mix_LoadWAV("data/son.wav");
+        if (sound == NULL) 
+            sound = Mix_LoadWAV("../data/son.wav");
         if (sound == NULL) {
-                cout << "Failed to load son.wav! SDL_mixer Error: " << Mix_GetError() << endl; SDL_Quit(); exit(1);
+                cout << "Failed to load son.wav! SDL_mixer Error: " << Mix_GetError() << endl; 
+                SDL_Quit();
+                exit(1);
         }
     }
 }
