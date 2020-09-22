@@ -15,18 +15,18 @@ MODE = "PERSO"
 VERBOSE = True
 
 ###          AUTRES OPTIONS             ###
-VIEWER = 'display' #visualiseur d'images (display / eog)
+VIEWER = 'display'  # visualiseur d'images (display / eog)
 
 
 ###          FONCTIONNALITES            ###
 def msg(pb, penalite=0, sep='', end='\n'):
     global NOTE
     global RETOUR
-    if penalite==0:
+    if penalite == 0:
         txt = pb
     else:
         txt = "PROBLEME : " + pb + ". J'enleve " + str(round(penalite, 2)) + " points."
-    print(txt,sep=sep,end=end)
+    print(txt, sep=sep, end=end)
     if NOTE > 0:
         NOTE = max(round(NOTE - penalite, 2), 0)
     RETOUR = RETOUR + txt + end
@@ -62,11 +62,11 @@ def listfiles(a):
 
 def rmfiles(thedir):
     if isdir(thedir):
-        #files = glob.glob(thedir + "/*")
-        #for f in files:
+        # files = glob.glob(thedir + "/*")
+        # for f in files:
         #    rmfiles(f)
-        #os.rmdir(thedir)
-        shutil.rmtree(thedir, ignore_errors=True) #fonctionne meme s'il y a des fichiers caches
+        # os.rmdir(thedir)
+        shutil.rmtree(thedir, ignore_errors=True)  # fonctionne meme s'il y a des fichiers caches
     else:
         if isfile(thedir):
             os.remove(thedir)
@@ -82,7 +82,7 @@ def filesize(read, enco="utf-8"):
         except UnicodeDecodeError:
             en = "latin1"
         except Error as exc_ret:
-            raise(exc_ret)
+            raise (exc_ret)
         finally:
             fs.close()
         fs = open(read, 'r', encoding=en)
@@ -102,7 +102,7 @@ def filein(lst):
     return read
 
 
-def countInFile(f, word):
+def count_in_file(f, word):
     if isfile(f):
         with open(f, 'r', errors='ignore') as fs:
             texte = fs.read()
@@ -113,7 +113,7 @@ def countInFile(f, word):
         return 0
 
 
-def replaceInFile(fin, fout, wordin, wordout):
+def replace_in_file(fin, fout, wordin, wordout):
     if isfile(fin):
         texte = ''
         with open(fin, 'r', errors='ignore') as fs:
@@ -125,7 +125,7 @@ def replaceInFile(fin, fout, wordin, wordout):
             fs.close()
 
 
-def isFiledatesOk(filedates, filemodif):
+def is_filedates_ok(filedates, filemodif):
     ok = True
     for f, lm in filedates.items():
         if isfile(f):
@@ -137,12 +137,12 @@ def isFiledatesOk(filedates, filemodif):
     return ok
 
 
-def isDepOk(f, filedates, filemodif):
+def is_dep_ok(f, filedates, filemodif):
     global VERBOSE
     if isfile(f):
         os.utime(f)
     make_process = subprocess.run(['make'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    ok = isFiledatesOk(filedates, filemodif)
+    ok = is_filedates_ok(filedates, filemodif)
     if VERBOSE:
         msg('Modif de ' + f + ', recompilation ' + {True: 'ok', False: 'pas ok'}[ok])
         msg("stdout:")
@@ -150,29 +150,42 @@ def isDepOk(f, filedates, filemodif):
     return ok
 
 
-def replaceAll(text, dic):
+def replace_all(text, dic):
     for i, j in dic.items():
         text = text.replace(i, j)
     return text
 
 
-def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
-    #echelle predefinie dans la liste ci-dessous,
-    #ou echelle personnalisee, e.g., utilisateurEvalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
-    #l'utilisateur peut falcutativement ajouter un commentaire en le separant de l'appreciation avec '#'
-    #par exemple : ...$ readme ok (n/n+/m-/m/m+/o-/o) ? o-#manquent les noms et numeros d'etudiants
+def utilisateur_demande(msgInvit, info):
+    preced = persiste_arch_val(info, 'rstr')
+    reponse = ''
+    while reponse == '':
+        reponse = input(msgInvit + ' ? (precedemment:' + preced + ')')
+        if reponse == '' and preced != 'None' and preced != '':
+            reponse = preced
+    persiste_arch_val(info, 'w', reponse)
+    return reponse
+
+def utilisateur_evalue(msgInvit, msgPb, penalite, echelle='oui/non'):
+    # echelle predefinie dans la liste ci-dessous,
+    # ou echelle personnalisee, e.g., utilisateur_evalue('...ok', 'pas bon', 0.5, ['i', '-m', 'm', 'ab', 'b'])
+    # l'utilisateur peut falcutativement ajouter un commentaire en le separant de l'appreciation avec '#'
+    # par exemple : ...$ readme ok (n/n+/m-/m/m+/o-/o) ? o-#manquent les noms et numeros d'etudiants
     echelles = {
         'oui/non': ['n', 'o'],
         'ech3': ['n', 'm', 'o'],
-        'ech7': ['n', 'n+', 'm-', 'm', 'm+', 'o-', 'o'] }
+        'ech7': ['n', 'n+', 'm-', 'm', 'm+', 'o-', 'o']}
     if str(echelle) in echelles:
         ech = echelles[echelle]
     else:
         ech = echelle
     evaluation = ''
     while evaluation not in ech:
+        preced = persiste_arch_val(msgInvit, 'rstr')
         reponse = input(msgInvit + ' (' + '/'.join(ech) + ') ? (precedemment:'
-            + persisteArchVal(msgInvit, 'rstr') + ') ')
+            + preced + ') ')
+        if reponse == '' and preced != 'None' and preced != '':
+            reponse = preced
         message = msgPb
         evaluation = reponse
         if '#' in reponse:
@@ -181,66 +194,67 @@ def utilisateurEvalue(msgInvit, msgPb, penalite, echelle='oui/non'):
         if evaluation in ech[0:-1]:
             msg(message, penalite * ((len(ech) - 1 - ech.index(evaluation)) / (len(ech) - 1)))
         if evaluation in ech:
-            persisteArchVal(msgInvit, 'w', reponse)
+            persiste_arch_val(msgInvit, 'w', reponse)
 
 
-def persisteArchVal(champ_in, action='r', valeur_in=None):
+def persiste_arch_val(champ_in, action='r', valeur_in=None):
     champs = ['nomArchive', 'nomFichier', 'numsEtu', 'repPrinc', 'note',
-        'image1 ok', 'image2 ok', 'affichage image ok', 'zoom/dezoom ok', 'readme ok']
-    return persisteValeur('../eval_archives.csv', champs, NOM_ARCHIVE, champ_in, action, valeur_in)
+        'image1 ok', 'image2 ok', 'affichage image ok', 'zoom/dezoom ok', 'readme ok', 'erreurs code penalite', 'erreurs code detail']
+    return persiste_valeur('../eval_archives.csv', champs, NOM_ARCHIVE, champ_in, action, valeur_in)
 
 
-def persisteEtuVal(num_etu, champ_in='note', action='w', valeur_in=None):
+
+def persiste_etu_val(num_etu, champ_in='note', action='w', valeur_in=None):
     champs = ['numEtu', 'note']
-    return persisteValeur('../eval_etudiants.csv', champs, num_etu, champ_in, action, valeur_in)
+    return persiste_valeur('../eval_etudiants.csv', champs, num_etu, champ_in, action, valeur_in)
 
 
-#persite dans le fichier csv 'nom_fichier' pour la ligne identifiee par la clef 'clef'
-#une valeur 'valeur_in' d'un champ 'champ_in' parmi le schema defini dans 'champs'
-#le premier champ de 'champs' est la clef des lignes du fichier csv
-#le fichier csv est editable avec un tableur type Excel avec separateur=tabulation
-#parametre 'action' : 'r' lire la valeur du champ, 'rstr' lire+convertir en chaîne, 'w' mettre a jour
-#meme si fichier ou ligne absente, toute action creee le fichier et la ligne (avec des valeurs vides)
-def persisteValeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=None):
+# persite dans le fichier csv 'nom_fichier' pour la ligne identifiee par la clef 'clef'
+# une valeur 'valeur_in' d'un champ 'champ_in' parmi le schema defini dans 'champs'
+# le premier champ de 'champs' est la clef des lignes du fichier csv
+# le fichier csv est editable avec un tableur type Excel avec separateur=tabulation
+# parametre 'action' : 'r' lire la valeur du champ, 'rstr' lire+convertir en chaîne, 'w' mettre a jour
+# meme si fichier ou ligne absente, toute action creee le fichier et la ligne (avec des valeurs vides)
+def persiste_valeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=None):
     if champ_in not in champs:
-        raise(Exception('ERREUR : champ "' + champ_in
-            + '" non present parmi les champs du fichier csv ' + nom_fichier))
+        raise (Exception('ERREUR : champ "' + champ_in
+                         + '" non present parmi les champs du fichier csv ' + nom_fichier))
     else:
         clef_champ = champs[0]
         clef_valeur = clef
-        #creation si besoin fichier csv vide
+        # creation si besoin fichier csv vide
         if not isfile(nom_fichier):
             with open(nom_fichier, 'w', newline='') as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=champs, dialect='excel-tab', quoting=csv.QUOTE_NONE)
                 writer.writeheader()
             csvfile.close()
-        #lecture fichier -> modele
-        data={}
+        # lecture fichier -> modele
+        data = {}
         with open(nom_fichier, newline='') as csvfile:
             reader = csv.DictReader(csvfile, dialect='excel-tab', quoting=csv.QUOTE_NONE)
             for row in reader:
                 data[row[clef_champ]] = row
         csvfile.close()
         if reader.fieldnames != champs:
-            raise(Exception('ERREUR : les champs du fichier csv ' + nom_fichier + ' ' + ','.join(reader.fieldnames)
-                + ' ne correspondent pas au schema ' + ','.join(champs)))
+            raise (Exception('ERREUR : les champs du fichier csv ' + nom_fichier + ' ' + ','.join(reader.fieldnames)
+                             + ' ne correspondent pas au schema ' + ','.join(champs)))
         else:
-            #ajout si besoin d'une entree au modele
+            # ajout si besoin d'une entree au modele
             if clef_valeur not in data:
                 row = {}
                 for champ in champs:
                     row[champ] = None
                 row[clef_champ] = clef_valeur
                 data[clef_valeur] = row
-            #action lecture ou ecriture
+            # action lecture ou ecriture
             if action == 'r':
                 return data[clef_valeur][champ_in]
             elif action == 'rstr':
                 return str(data[clef_valeur][champ_in])
             elif action == 'w':
-                #maj donnee dans modele
+                # maj donnee dans modele
                 data[clef_valeur][champ_in] = valeur_in
-                #ecriture modele -> fichier
+                # ecriture modele -> fichier
                 with open(nom_fichier, 'w', newline='') as csvfile:
                     writer = csv.DictWriter(csvfile, fieldnames=champs, dialect='excel-tab', quoting=csv.QUOTE_NONE)
                     writer.writeheader()
@@ -248,8 +262,7 @@ def persisteValeur(nom_fichier, champs, clef, champ_in, action='r', valeur_in=No
                         writer.writerow(row)
                 csvfile.close()
             else:
-                raise(Exception('ERREUR : action csv inconnue : ' + action))
-
+                raise (Exception('ERREUR : action csv inconnue : ' + action))
 
 
 ###           EXECUTION DU SCRIPT          ###
@@ -291,7 +304,7 @@ NUMEROS_ETU = []
 NOM_ARCHIVE_ATTENDU = ""
 
 replaceP = {"p": "1", "P": "1"}
-FILENAME_P_REPLACED = replaceAll(FILENAME, replaceP)
+FILENAME_P_REPLACED = replace_all(FILENAME, replaceP)
 for mot in FILENAME_P_REPLACED.split(".")[0].split("_"):
     if mot.isdigit() and len(mot) == 8:
         NUMEROS_ETU.append(mot)
@@ -317,7 +330,7 @@ if VERBOSE:
 ###  EXTRACTION DE L'ARCHIVE  ###
 msg("===> decompression de l'archive ...")
 tar = tarfile.open(FILENAME)
-#DIR = tar.members[0].name.split("/")[0]
+# DIR = tar.members[0].name.split("/")[0]
 DIR = "aucun_repertoire_principal"
 for tarmember in tar:
     if tarmember.isdir() and '/' not in tarmember.name:
@@ -495,24 +508,28 @@ if len(glob.glob("obj/*.o")) != len(glob.glob("**/*.o", recursive=True)):
     msg("Fichiers objets dans le mauvais repertoire", 0.5)
 
 if isfile("src/Pixel.h") and isfile("src/Pixel.cpp") and isfile("src/Image.h") and isfile("src/Image.cpp") \
-    and isfile("src/mainTest.cpp"):
+        and isfile("src/mainTest.cpp"):
     makedepok = True
     filedates = {'obj/mainTest.o': 0, 'obj/Pixel.o': 0, 'obj/Image.o': 0, 'bin/test': 0}
-    isFiledatesOk(filedates, {})
-    makedepok = isDepOk('src/mainTest.cpp', filedates, {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
-                                                        'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
+    is_filedates_ok(filedates, {})
+    makedepok = is_dep_ok('src/mainTest.cpp', filedates,
+                        {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                         'bin/test': True}) and makedepok
+    makedepok = is_dep_ok('src/Image.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': True,
                                                      'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Image.h', filedates,
-                        {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True, 'bin/test': True}) and makedepok
-    makedepok = isDepOk('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
+    makedepok = is_dep_ok('src/Image.h', filedates,
+                        {'obj/mainTest.o': True, 'obj/Pixel.o': False, 'obj/Image.o': True,
+                         'bin/test': True}) and makedepok
+    makedepok = is_dep_ok('src/Pixel.cpp', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': False,
                                                      'bin/test': True}) and makedepok
-    makedepok = (isDepOk('src/Pixel.h', filedates,
-                        {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
-                isDepOk('src/Pixel.h', filedates,
-                        {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True})) and makedepok
-    makedepok = isDepOk('aucun_fichier', filedates, {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
-                                                     'bin/test': False}) and makedepok
+    makedepok = (is_dep_ok('src/Pixel.h', filedates,
+                         {'obj/mainTest.o': True, 'obj/Pixel.o': True, 'obj/Image.o': True, 'bin/test': True}) or
+                 is_dep_ok('src/Pixel.h', filedates,
+                         {'obj/mainTest.o': False, 'obj/Pixel.o': True, 'obj/Image.o': True,
+                          'bin/test': True})) and makedepok
+    makedepok = is_dep_ok('aucun_fichier', filedates,
+                        {'obj/mainTest.o': False, 'obj/Pixel.o': False, 'obj/Image.o': False,
+                         'bin/test': False}) and makedepok
     if not makedepok:
         msg('Les dependances ne sont pas correctement prises en compte dans le Makefile', 0.25)
 else:
@@ -560,7 +577,7 @@ elif isfile("../image1.ppm"):
     im_file_etu.close()
 else:
     make_process = subprocess.run([VIEWER, 'data/image1.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    utilisateurEvalue('image1 ok', 'image1.ppm erronee', 0.5)
+    utilisateur_evalue('image1 ok', 'image1.ppm erronee', 0.5)
 
 if not isfile("data/image2.ppm"):
     msg("image2.ppm non generee (ou pas dans data)", 0.5)
@@ -577,7 +594,7 @@ elif isfile("../image2.ppm"):
     im_file_etu.close()
 else:
     make_process = subprocess.run([VIEWER, 'data/image2.ppm'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    utilisateurEvalue('image2 ok', 'image2.ppm erronee', 0.5)
+    utilisateur_evalue('image2 ok', 'image2.ppm erronee', 0.5)
 
 msg("===> bin/exemple ... done")
 if VERBOSE:
@@ -600,7 +617,7 @@ else:
 if isfile("../mainTestRegression.cpp"):
     if VERBOSE:
         msg("Test de regression ...")
-    replaceInFile('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
+    replace_in_file('src/Image.h', 'src/ImageRegression.h', 'private', 'public')
     subprocess.run(['cp', '../mainTestRegression.cpp', 'src/mainTestRegression.cpp'])
     subprocess.run(
         ['g++', '-ggdb', '-std=c++11', '-c', 'src/mainTestRegression.cpp', '-I/usr/include/SDL2', '-o',
@@ -631,7 +648,7 @@ if VERBOSE:
     msg("==> note = " + str(NOTE))
 
 msg("===> valgrind sur bin/test ...")
-#if isfile("bin/test"):
+# if isfile("bin/test"):
 if not isfile("bin/test"):
     msg("executable bin/test absent, test valgrind sur bin/test impossible", 1.5)
 else:
@@ -685,9 +702,9 @@ else:
             msg(make_process.stdout.decode("utf-8", "ignore"))
             msg("stderr:")
             msg(make_process.stderr.decode("utf-8", "ignore"))
-        utilisateurEvalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
-            #echelle d'appreciations ech3: n (non/insuffisant), m (moyen), o (oui/bien)
-        utilisateurEvalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
+        utilisateur_evalue('affichage image ok', 'bin/affichage non fonctionnel ou incomplet', 0.5, 'ech3')
+        # echelle d'appreciations ech3: n (non/insuffisant), m (moyen), o (oui/bien)
+        utilisateur_evalue('zoom/dezoom ok', 'zoom/dezoom non fonctionnel ou incomplet', 0.25, 'ech3')
         # TODO : else: automatiser la verif de bin/affichage
 
 msg("===> bin/affichage ... done")
@@ -704,8 +721,8 @@ if readme != "":
         msg("longueur du fichier " + readme + " : " + str(longueur) + " caracteres")
     if MODE == "SEMIAUTO" or MODE == "PERSO":
         make_process = subprocess.run(['gedit', readme], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        utilisateurEvalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
-            #echelle d'appreciations ech7: n (non/insuffisant), n+, m-, m (moyen), m+, o-, o (oui/bien)
+        utilisateur_evalue('readme ok', 'readme pas assez detaille', 0.5, 'ech7')
+        # echelle d'appreciations ech7: n (non/insuffisant), n+, m-, m (moyen), m+, o-, o (oui/bien)
     elif longueur < 500:
         msg(readme + " pas assez detaille", 0.5)
 else:
@@ -740,8 +757,8 @@ files_h = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h"]
 n_brief = 0
 n_param = 0
 for f in files_h:
-    n_brief += countInFile(f, "brief")
-    n_param += countInFile(f, "param")
+    n_brief += count_in_file(f, "brief")
+    n_param += count_in_file(f, "param")
 if VERBOSE:
     msg("Nombre de fonctions commentees : " + str(n_brief))
     msg("Nombre de parametres commentes : " + str(n_param))
@@ -762,7 +779,7 @@ files = ["src/image.h", "src/Image.h", "src/pixel.h", "src/Pixel.h", "src/image.
 n = 0
 for f in files:
     for s in search:
-        n += countInFile(f, s)
+        n += count_in_file(f, s)
 if VERBOSE:
     msg("Nombre d'assertions : " + str(n))
 if n < 10:
@@ -775,7 +792,7 @@ if VERBOSE:
 msg("===> code ...")
 if MODE == "FULLAUTO" or MODE == "PERSO":
     ## Pixel.h ##
-    if not(isfile("src/Pixel.h") or isfile("src/pixel.h")):
+    if not (isfile("src/Pixel.h") or isfile("src/pixel.h")):
         msg("src/Pixel.h absent, test code Pixel.h impossible", 0.25)
     files = ["src/Pixel.h", "src/pixel.h"]
     for f in files:
@@ -786,9 +803,18 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
             texte = re.sub("//.*", "", texte)
             if texte.count("unsigned char") == 0:
                 msg("Mauvais type des donnees membres de Pixel", 0.25)
+            istart = texte.find("getRouge")
+            if istart == -1:
+                istart = texte.find("getrouge")
+            iend = texte[istart:].find(";") + istart
+            if texte[istart:iend].find("const") == -1:
+                msg("Erreur entetes accesseurs Pixel", 0.5)
+            istart = texte[:iend - 1].rfind(";")
+            if texte[istart:iend].find("unsigned char") == -1:
+                msg("Erreur entetes accesseurs Pixel", 0.5)
             fi.close()
     ## Image.h ##
-    if not(isfile("src/Image.h") or isfile("src/image.h")):
+    if not (isfile("src/Image.h") or isfile("src/image.h")):
         msg("src/Image.h absent, test code Image.h impossible", 3)
     files = ["src/Image.h", "src/image.h"]
     for f in files:
@@ -797,15 +823,12 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
             texte = fi.read()
             texte = re.sub("(?<=\/\*)(.*?)(?=\*\/)", "", texte, 0, re.DOTALL)
             texte = re.sub("//.*", "", texte)
-
             if texte.count("#include") > 4:
                 msg("Des include inutiles dans Image.h", 0.25)
-
             iend = texte.find("getPix")
             istart = texte[:iend].rfind("Pixel")
             if texte[istart:iend].find("*") != -1 or texte[istart:iend].find("&") == -1:
                 msg("Mauvais type de retour de getPix", 0.5)
-
             nb_const_manquant = 0
             istart = texte.find("getPix")
             istart2 = texte[istart:].find(")")
@@ -814,17 +837,14 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
             iend += istart
             if texte[istart:iend].find("const") == -1:
                 nb_const_manquant += 1
-
             istart = texte.find("setPix")
             iend = texte[istart:].find(")")
             iend += istart
             istart = texte[istart:iend].rfind(",") + istart + 1
             if texte[istart:iend].find("const") == -1 or texte[istart:iend].find("&") == -1:
                 nb_const_manquant += 1
-
             if nb_const_manquant > 0:
                 msg("Manque des const", 0.5)
-
             if texte.find("dimx") == -1 or texte.find("dimy") == -1 or texte.find("tab") == -1:
                 msg("Mauvais nom des donnees membres", 0.5)
             if texte.find("Image") == -1 or texte.find("getPix") == -1 or texte.find("setPix") == -1 or texte.find(
@@ -832,15 +852,88 @@ if MODE == "FULLAUTO" or MODE == "PERSO":
                 msg("Manque des fonctions ou mauvais noms", 0.5)
             if texte.find("sauver") == -1 or texte.find("ouvrir") == -1 or texte.find("afficher") == -1:
                 msg("Manque les fonctions I/O", 0.5)
-
             fi.close()
-else:
-    command = ['gedit']
-    command.extend(glob.glob("src/*.*"))
-    make_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    points = min(int(input('nombre de points a deduire ? ')), 3)
-    if points > 0:
-        msg("Erreurs dans le code", points)
+
+    ## Image.cpp ##
+    if not (isfile("src/Image.cpp") or isfile("src/image.cpp")):
+        msg("src/Image.cpp absent, test code Image.cpp impossible", 3)
+    files = ["src/Image.cpp", "src/image.cpp"]
+    for f in files:
+        if isfile(f):
+            fi = open(f, 'r', encoding="latin-1")
+            texte = fi.read()
+            texte = re.sub("(?<=\/\*)(.*?)(?=\*\/)", "", texte, 0, re.DOTALL)
+            texte = re.sub("//.*", "", texte)
+            istart = texte.find("::Image")
+            if istart == -1:
+                istart = texte.find(":: Image")
+            if istart == -1:
+                msg('Constructeur Image impossible a trouver', 0.25)
+            iend = texte[istart + 2:].find("::") + istart + 2
+            imid = texte[istart:iend].find("NULL")
+            if imid == -1:
+                imid = texte[istart:iend].find("nullptr")
+            imid2 = texte[istart:iend].find("tab")
+            if imid == -1 or imid2 == -1 or imid < imid2:
+                msg("Erreur initialisation tab", 0.25)
+            istart = texte.find("~Image")
+            if istart == -1:
+                istart = texte.find("~ Image")
+            if istart == -1:
+                msg('Destructeur Image impossible a trouver', 0.25)
+            iend = texte[istart:].find("::") + istart
+            imid1 = texte[istart:iend].find("if")
+            imid2 = texte[istart:iend].find("tab")
+            imid3 = texte[istart:iend].find("NULL")
+            if imid3 == -1:
+                imid3 = texte[istart:iend].find("nullptr")
+            imid4 = texte[istart:iend].find("delete")
+            if imid1 == -1 or imid2 == -1 or imid3 == -1 or imid4 == -1:
+                msg("Erreur destruction tab", 0.25)
+            istart = texte.find("::testRegression")
+            if istart == -1:
+                istart = texte.find(":: testRegression")
+            if istart == -1:
+                msg('Fonction de test impossible a trouver', 0.5)
+            iend = texte[istart + 2:].find("::")
+            if iend == -1:
+                iend = len(texte) - 1
+            else:
+                iend += istart + 2
+            nba = texte[istart:iend].count('assert')
+            if nba < 6:
+                msg('Principe de test regression pas compris', 0.5)
+            fi.close()
+
+    ## mainTest.cpp ##
+    if not (isfile("src/mainTest.cpp") or isfile("src/maintest.cpp")):
+        msg("src/mainTest.cpp absent, test code mainTest.cpp impossible", 0.5)
+    files = ["src/mainTest.cpp", "src/maintest.cpp"]
+    for f in files:
+        if isfile(f):
+            fi = open(f, 'r', encoding="latin-1")
+            texte = fi.read()
+            texte = re.sub("(?<=\/\*)(.*?)(?=\*\/)", "", texte, 0, re.DOTALL)
+            texte = re.sub("//.*", "", texte)
+            istart = texte.find("monImage")
+            if istart == -1:
+                msg("Fichier mainTest modifie", 0.25)
+            iend = texte[istart:].find(";") + istart
+            imid1 = texte[istart:iend].find("(")
+            imid2 = texte[istart:iend].find(",")
+            imid3 = texte[istart:iend].find(")")
+            if imid1 != -1 or imid2 != -1 or imid3 != -1:
+                msg("Fichier mainTest modifie", 0.25)
+            fi.close()
+
+command = ['gedit']
+command.extend(glob.glob("src/*.*"))
+make_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+reponse = utilisateur_demande('Problemes dans le code, nombre de points a deduire (limite a trois points) ', 'erreurs code penalite')
+points = min(float(reponse), 3)
+if points > 0:
+    reponse = utilisateur_demande('Problemes dans le code, commentaires', 'erreurs code detail')
+    msg('' + reponse + '\n' + 'Problemes dans le code', points)
 
 msg("===> code ... done")
 if VERBOSE:
@@ -853,7 +946,7 @@ msg(txt_numetu, end=' ')
 msg("ont la note " + str(NOTE) + "\n")
 
 ###  FICHIERS FEEDBACK ET NOTES  ###
-if isfile("../mainTestRegression.cpp"): #mode prof
+if isfile("../mainTestRegression.cpp"):  # mode prof
     for etu in NUMEROS_ETU:
         foutput = open('../' + str(etu) + '#feedback.txt', 'w')
         foutput.write(NOM_ARCHIVE + " : " + str(NOTE) + "\n" + RETOUR)
@@ -876,14 +969,16 @@ if isfile("../mainTestRegression.cpp"): #mode prof
             foutput.write(str(etu) + " " + str(NOTE) + "\n")
         foutput.close()
 
-    persisteArchVal('nomFichier', 'w', FILENAME)
-    persisteArchVal('numsEtu', 'w', '#'.join(NUMEROS_ETU))
-    persisteArchVal('repPrinc', 'w', DIR)
-    persisteArchVal('note', 'w', NOTE)
+    persiste_arch_val('nomFichier', 'w', FILENAME)
+    persiste_arch_val('numsEtu', 'w', '#'.join(NUMEROS_ETU))
+    persiste_arch_val('repPrinc', 'w', DIR)
+    persiste_arch_val('note', 'w', NOTE)
 
     for etu in NUMEROS_ETU:
-        persisteEtuVal(etu, 'note', 'w', NOTE)
+        persiste_etu_val(etu, 'note', 'w', NOTE)
 
 print("-----------------------FIN DU SCRIPT--------------------------")
 input('Appuyer sur Entree pour quitter...')
+
+
 
