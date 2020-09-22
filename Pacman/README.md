@@ -73,6 +73,17 @@ Editer le fichier Makefile pour choisir votre plateforme entre texte ou SDL !
 ### Version Texte/SDL2 avec VisualCode
 en chantier ... je regarde, je regarde ... il y a déjà le pacman.code-workspace
 
+La doc : `https://code.visualstudio.com/docs/languages/cpp`
+
+Sous Windows :
+- installer MinGW ou CodeBlocks 20 (qui installe MinGW)
+- ajouter le chemin vers le compilateur dans la variable PATH. Dans Paramètres, rechercher PATH, puis Modifier variable d'environnements.
+  Et ajouter le chemin, si CB : `C:\Program Files\CodeBlocks\MinGW\bin` et si MinGW `C:\MinGW\bin`
+  Tester en lancant un CMDPrompt et taper `g++ --version`
+- La version simple : ouvrer le terminal intégré à VisualCode avec le menu ou `ctrl+ù`puis lancer `mingw32-make -f Makefile_txt_sdl`
+- la version intégré `ctrl+shift+B`
+- Dans VisualCode : Ctrl+Shift+P et cherche `task`
+
 
 ### Version Texte/SDL2 sous Linux/Windows/Windows-WSL avec Codeblocks : bien testé, devrait marcher
 Identique sous Linux et Windows après avoir installé SDL2.
