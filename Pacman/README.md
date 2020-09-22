@@ -17,29 +17,28 @@ puis d'avoir une surcouche pour l'affichage : texte/console, SDL2, Qt, OpenGl, e
 
 L'organistion des fichiers est la suivante.
 
-Pacmansrc/core   : les classes de base du Pacman (il n'y a ici aucun appel aux couches du dessus, de l'affichage). 
+- **Pacmansrc/core**   : les classes de base du Pacman (il n'y a ici aucun appel aux couches du dessus, de l'affichage). 
                         Ce code doit compiler sans dépendance à part les lib du système.
-Pacman/src/txt   : les classes s'occupant de faire tourner un pacman (core) et de l'afficher sur la console en texte, 
+- **Pacman/src/txt**   : les classes s'occupant de faire tourner un pacman (core) et de l'afficher sur la console en texte, 
                        il y a une classe winTxt facilitant l'utilisation  une fenêtre texte et des évènements claviers.
-Pacman/src/SDL2  : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec SDL2
-Pacman/src/sfml  : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec SFML
-Pacman/src/Qt    : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec Qt
-
-Pacman/extern    : contient une version de SDL2 pour windows. 
+- **Pacman/src/SDL2**  : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec SDL2
+- **Pacman/src/sfml**  : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec SFML
+- **Pacman/src/Qt**    : les classes s'occupant de faire tourner un pacman (core) et de l'afficher avec Qt
+- **Pacman/extern**    : contient une version de SDL2 pour windows. 
                         Sous linux il faut installer SDL2 avec votre gestionnaire de package, voir la rubrique pour compiler.
-Pacman/doc       : le fichier doxygen qui permet de générer la documentation du code
-Pacman/data      : les assets (image, sons, etc.)
-Pacman/bin       : répertoire où les executables seront compilés 
-Pacman/obj       : répertoire comportant les compilations intermédiaires (.o)
+- **Pacman/doc**       : le fichier doxygen qui permet de générer la documentation du code
+- **Pacman/data**      : les assets (image, sons, etc.)
+- **Pacman/bin**       : répertoire où les executables seront compilés 
+- **Pacman/obj**       : répertoire comportant les compilations intermédiaires (.o)
 
-Pacman/pacman.cbp : fichier de projet pour compiler avec Codeblocks. 
+- **Pacman/pacman.cbp** : fichier de projet pour compiler avec Codeblocks. 
                     Il faut choisir la cible DebugTXT pour compiler la version console/texte ou DebugSDL pour la version SDL2.
                     Normalement ce projet fonctionne sous CB 20.04 Linux et Windows 
                     (TODO : mettre à jour le répertoire EXTERN pour fonctionner avec le nv compilo de CB 20)
 
-Pacman/Pacman_qt.pro : le projet Qt. 
+- **Pacman/Pacman_qt.pro** : le projet Qt. 
 
-Pacman/pacman.code-workspace : fichier d'environnement de Visual Code. A ouvrir pour compiler avec Visual Code.
+- **Pacman/pacman.code-workspace** : fichier d'environnement de Visual Code. A ouvrir pour compiler avec Visual Code.
 
 
 Pour la documentation du code, voir la rubrique "documentation du code" plus bas.
@@ -48,9 +47,13 @@ Pour la documentation du code, voir la rubrique "documentation du code" plus bas
 ## Pour compiler
 
 ### Préambule : si vous voulez un Linux sous Windows, installez WSL ! 
+
 Voir la page de l'UE : https://perso.liris.cnrs.fr/alexandre.meyer/public_html/www/doku.php?id=lifap4#wsl_pour_faire_tourner_un_linux_ultra_leger_sous_windows
+
 C'est léger, pratique, rapide et suffisant pour de nombreuses applications.
-Windows/WSL est exactement comme Linux si vous avez installé XMing comme expliqué sur la page du cours.
+Windows/WSL est exactement comme une machine Linux avec des drivers minimalistes, 
+donc la gestion de certains périphériques commes la carte son ou l'accélération 3D peut ne pas marcher mais pour ce cours ca peut être suffisant.
+Il faut parcontre que vous ayez installé XMing pour pouvoir ouvrir des fen^tres comme expliqué sur la page du cours. 
 Valgrind marche aussi !
 
 
@@ -91,7 +94,8 @@ make
 
 
 ### Version SFML : 
-Il faut installer 
+Il faut installer SFML
+```sudo apt-get install libsfml-dev```
 
 
 
