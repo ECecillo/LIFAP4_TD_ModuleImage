@@ -22,3 +22,7 @@ Pacman/pacman_qt
 Pacman/Makefile
 
 exemples_cours/pointeur_f/.vscode/ipch/3683daeaeb26409c/
+
+SDL2_exemple/a.out
+
+SDL2_exemple/simple
