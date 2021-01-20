@@ -664,7 +664,7 @@ else:
     iend = int(str_stderr.find("bytes", istart))
     nb_bytes_lost = 0
     if istart == -1 and iend == -1:
-        if str_stderr.find("All heap blocks were fread") != -1:
+        if str_stderr.find("All heap blocks were freed") != -1:
             msg("Fuite memoire sur la pile", 0.5)
     else:
         nb_bytes_lost = int(str_stderr[istart + 17:iend].replace(',', ''))
