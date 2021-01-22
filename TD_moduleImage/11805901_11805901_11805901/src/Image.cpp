@@ -1,43 +1,59 @@
 #include <iostream>
 #include <Image.h>
-
+#include <cassert> // Pour les assert.
 
 using namespace std;
 
 
 Image::Image () {
-    dimx = 0;
-    dimy = 0;
+    tab = NULL;
+    dimy = dimx = 0;
 }
 
 Image::~Image () {
     delete [] tab;
-    dimx = 0;
-    dimy = 0;
+    tab = NULL; 
+    dimy = dimx = 0;
 }
 
-Image::Image(const unsigned int dimensionX, const unsigned int dimensionY) :
-        dimx(dimensionX), dimy(dimensionY)
+Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
 {
-    Pixel * tab = new Pixel[dimx*dimy];
+    assert(dimensionX > 0 && dimensionY > 0);
+    dimx = dimensionX;
+    dimy = dimensionY;
+    tab = new Pixel[dimx*dimy];
 }
 
 Pixel Image::getPix(unsigned int x,unsigned int y) {
+    assert(x >= 0 && y >= 0);
     return tab[y*dimx+x];
 }
 
 void Image::setPix (unsigned int x,unsigned int y, Pixel couleur) {
-    tab[y*dimx+x].setRouge(couleur.getRouge());
-    tab[y*dimx+x].setBleu(couleur.getBleu());
-    tab[y*dimx+x].setVert(couleur.getVert());
+    assert((x >= 0 && y >= 0));
+    assert((couleur.getRouge() >= 0 && couleur.getRouge() <= 255) &&
+    (couleur.getBleu() >= 0 && couleur.getBleu() <= 255) &&
+    (couleur.getVert() >= 0 && couleur.getVert() <= 255) );
+    
+    tab[y*dimx+x] = couleur;
 }
 
 void Image::dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, Pixel couleur) {
-    setPix(Xmin,Ymin, couleur); // On fixe le bas à gauche du rectangle.
-    setPix(Xmin,Ymax, couleur); // On fixe le haut à gauche du rectangle.
-    
-    setPix(Xmax,Ymax, couleur); // On fixe le haut à droite du rectangle.
-    setPix(Xmax,Ymin, couleur); // On fixe le bas à droite du rectangle.
+    assert(
+    (Xmin >= 0 && Ymin >= 0) &&
+    (Xmax > 0 && Ymax > 0));
+    assert((Xmax >= Xmin && Ymax > Ymin));
+
+    assert(
+    (couleur.getRouge() >= 0 && couleur.getRouge() <= 255) &&
+    (couleur.getBleu() >= 0 && couleur.getBleu() <= 255) &&
+    (couleur.getVert() >= 0 && couleur.getVert() <= 255));
+
+    for(int i = Xmin; i <= Xmax; i++) {
+        for (int j = Ymin; j <= Ymax; j++) {
+            setPix(i,j,couleur);
+        }
+    }
 }
 
 void Image::effacer (Pixel couleur) {
