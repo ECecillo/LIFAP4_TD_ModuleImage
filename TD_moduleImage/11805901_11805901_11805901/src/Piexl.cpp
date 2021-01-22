@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Pixel.h"
+#include <cassert>
 
 using namespace std;
 
@@ -25,13 +26,16 @@ int Pixel::getBleu () const {
 }
 
 void Pixel::setRouge (const unsigned int nr) {
+    assert(nr >= 0 && nr <= 255);
     r = nr;
 }
 
 void Pixel::setVert (const unsigned int nv) {
+    assert(nv >= 0 && nv <= 255);
     v = nv;
 }
 
 void Pixel::setBleu (const unsigned int nb) {
+    assert(nb >= 0 && nb <= 255);
     b = nb;
 }

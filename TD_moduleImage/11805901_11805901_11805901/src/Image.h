@@ -10,8 +10,8 @@ using namespace std;
 class Image
 {
 private:
-    Pixel tab[];    // Tableau 1D de Pixel.
-    int dimx, dimy; // Les dimensions de l'image.
+    Pixel * tab;    // Tableau 1D de Pixel.
+    unsigned int dimx, dimy; // Les dimensions de l'image.
 
 public:
     // Constructeur par défaut de la classe: initialise dimx et dimy à 0
@@ -43,5 +43,6 @@ public:
    // Effectue une série de tests vérifiant que le module fonctionne et
    // que les données membres de l'objet sont conformes
    void testRegression ();
+
 };
 #endif
