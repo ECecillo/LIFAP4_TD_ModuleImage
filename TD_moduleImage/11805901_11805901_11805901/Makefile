@@ -13,8 +13,13 @@ OBJ_PATH = obj/
 
 # =========== Fichiers ===========
 
-SRC = $(SRC_PATH)mainTest.cpp $(SRC_PATH)image.cpp $(SRC_PATH)pixel.cpp 
-OBJ = $(OBJ_PATH)mainTest.o $(OBJ_PATH)image.o $(OBJ_PATH)pixel.o 
+# Fichiers .o et .cpp du programme principale
+MAIN_CPP = mainTest.cpp
+MAIN_O = mainTest.o
+
+
+SRC = $(SRC_PATH)$(MAIN_CPP) $(SRC_PATH)image.cpp $(SRC_PATH)pixel.cpp 
+OBJ = $(OBJ_PATH)$(MAIN_O) $(OBJ_PATH)image.o $(OBJ_PATH)pixel.o 
 
 	# Module Image
 	IMAGE = $(SRC_PATH)image.cpp $(SRC_PATH)image.h
