@@ -8,7 +8,8 @@ FLAGS = -g -Wall
 # =========== Chemins ================
 
 SRC_PATH = src/
-OBJ_PATH = src/o/ 
+OBJ_PATH = obj/
+#EXEC_PATH = bin/exemple/ 
 
 # =========== Fichiers ===========
 
@@ -27,7 +28,7 @@ OBJ = $(OBJ_PATH)mainTest.o $(OBJ_PATH)image.o $(OBJ_PATH)pixel.o
 all: $(EXEC)
 
 $(EXEC): $(obj)
-	$(CC) $(OBJ) -o $(EXEC)
+	$(CC) $(OBJ) -o bin/exemple/$(EXEC)
 
 mainTest.o: main.cpp $(IMAGE_H) $(PIXEL_H)
 	$(CC) -c $(SRC_PATH)main.cpp

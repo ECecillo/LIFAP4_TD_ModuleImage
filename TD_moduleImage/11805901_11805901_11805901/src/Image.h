@@ -31,14 +31,14 @@ public:
    Pixel getPix (unsigned int x,unsigned int y);
 
    // Mutateur : modifie le pixel de coordonnées (x,y)
-   void setPix (unsigned int x, unsigned int y, Pixel couleur);
+   void setPix (unsigned int x, unsigned int y, const Pixel& couleur);
 
    // Dessine un rectangle plein de la couleur dans l'image (en utilisant setPix, indices en paramètre compris)
-   void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, Pixel couleur);
+   void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur);
 
    // Efface l'image en la remplissant de la couleur en paramètre
    // (en appelant dessinerRectangle avec le bon rectangle)
-   void effacer (Pixel couleur);
+   void effacer (const Pixel& couleur);
 
    // Effectue une série de tests vérifiant que le module fonctionne et
    // que les données membres de l'objet sont conformes
