@@ -1,44 +1,45 @@
 # =========== Nom Exec ===================
-EXEC = prog.out
+EXEC = bin/example/prog
 
 # =========== Commande de compil ===========
-CC = gcc
+CC = g++
 FLAGS = -g -Wall
 
 # =========== Chemins ================
 
 SRC_PATH = src/
-OBJ_PATH = src/o/ 
+OBJ_PATH = obj/
 
 # =========== Fichiers ===========
 
-SRC = $(SRC_PATH)mainTest.cpp $(SRC_PATH)image.cpp $(SRC_PATH)pixel.cpp 
-OBJ = $(OBJ_PATH)mainTest.o $(OBJ_PATH)image.o $(OBJ_PATH)pixel.o 
+SRC = $(SRC_PATH)mainTest.cpp $(SRC_PATH)Image.cpp $(SRC_PATH)Pixel.cpp 
+OBJ = $(OBJ_PATH)mainTest.o $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o 
 
 	# Module Image
-	IMAGE = $(SRC_PATH)image.cpp $(SRC_PATH)image.h
-	IMAGE_H = $(SRC_PATH)image.h 
+	IMAGE = $(SRC_PATH)Image.cpp $(SRC_PATH)Image.h
+	IMAGE_H = $(SRC_PATH)Image.h 
 	# Module Pixel
-	PIXEL = $(SRC_PATH)pixel.h $(SRC_PATH)pixel.cpp
-	PIXEL_H = $(SRC_PATH)pixel.h
+	PIXEL = $(SRC_PATH)Pixel.h $(SRC_PATH)Pixel.cpp
+	PIXEL_H = $(SRC_PATH)Pixel.h
 
 # ====================== Makefile ======================
 
 all: $(EXEC)
 
-$(EXEC): $(obj)
-	$(CC) $(OBJ) -o $(EXEC)
+$(EXEC): $(OBJ)
+	$(CC) $(FLAGS) $(OBJ) -o $(EXEC)
 
-mainTest.o: main.cpp $(IMAGE_H) $(PIXEL_H)
-	$(CC) -c $(SRC_PATH)main.cpp
+$(OBJ_PATH)mainTest.o: $(SRC_PATH)mainTest.cpp $(IMAGE_H) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)mainTest.cpp -o $(OBJ_PATH)mainTest.o
 
-image.o: $(IMAGE) $(PIXEL_H)
-	$(CC) -c $(SRC_PATH)image.cpp
-pixel.o: $(PIXEL)
-	$(CC) -c $(SRC_PATH)pixel.cpp
+$(OBJ_PATH)Image.o: $(IMAGE) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o
+
+$(OBJ_PATH)Pixel.o: $(PIXEL)
+	$(CC) $(FLAGS) -c $(SRC_PATH)Pixel.cpp -o $(OBJ_PATH)Pixel.o
 
 clean:
 	rm -f $(OBJ_PATH)*.o *.out
 
 veryclean: 
-	rm -f $(EXEC) $(OBJ_PATH)$(obj) 
+	rm -f $(EXEC) $(OBJ_PATH)*.o
