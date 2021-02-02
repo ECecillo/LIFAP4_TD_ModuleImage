@@ -7,7 +7,7 @@ using namespace std;
 
 class Pixel {
     private :
-        unsigned int r,v,b; // Les composantes du pixel, unsigned char en C++.
+        unsigned char r,v,b; // Les composantes du pixel, unsigned char en C++.
     
     public :
         // Constructeur par défaut de la classe: initialise le pixel à la couleur noire

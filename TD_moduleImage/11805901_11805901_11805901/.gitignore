@@ -1,0 +1,5 @@
+# On met ici les dossiers, fichiers que l'on voudra éviter de mettre lors de nos commits.
+obj/*.o
+build*
+bin/exemple/*
+doc/
