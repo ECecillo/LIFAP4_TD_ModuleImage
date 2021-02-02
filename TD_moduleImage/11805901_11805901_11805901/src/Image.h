@@ -77,7 +77,7 @@ public:
 	/**
 	 * @brief
 	 * Efface le contenu de l'image en la remplissant de couleur
-	 * @param
+	 * @param [in]
 	 * Couleur
 	 */
 	void effacer(const Pixel &couleur);
@@ -85,7 +85,7 @@ public:
 	/**
 	 * @brief
 	 * Sauvegarde l'image au format ppm
-	 * @param
+	 * @param [in]
 	 * Chemin de la sauvegarde
 	 */
 	void sauver(const string &filename) const;
@@ -93,7 +93,7 @@ public:
 	/**
 	 * @brief
 	 * Ouvrir une image de format ppm
-	 * @param
+	 * @param [in]
 	 * Chemin de l'image
 	 */
 	void ouvrir(const std::string &filename);
