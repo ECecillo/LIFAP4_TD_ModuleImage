@@ -14,25 +14,27 @@ class Pixel {
         Pixel();
 
         // Constructeur de la classe: initialise r,g,b avec les paramètres   
-        Pixel (const unsigned int nr,const unsigned int nv, const unsigned int nb);
+        Pixel (const unsigned char nr,const unsigned char nv, const unsigned char nb);
    
         // Accesseur : récupère la composante rouge du pixel
-        int getRouge () const;
+        unsigned char getRouge () const;
 
         // Accesseur : récupère la composante verte du pixel
-        int getVert () const;
+        unsigned char getVert () const;
 
         // Accesseur : récupère la composante bleue du pixel
-        int getBleu () const;
+        unsigned char getBleu () const;
 
         // Mutateur : modifie la composante rouge du pixel
-        void setRouge (const unsigned int nr);
+        void setRouge (const unsigned char nr);
 
         // Mutateur : modifie la composante verte du pixel
-        void setVert (const unsigned int nv);
+        void setVert (const unsigned char nv);
 
         // Mutateur : modifie la composante bleue du pixel
-        void setBleu (const unsigned int nb);
+        void setBleu (const unsigned char nb);
+
+        bool operator==(const Pixel& other);
 };
 
 #endif
