@@ -2,14 +2,9 @@
 #define IMAGE_H
 
 #include <iostream>
-<<<<<<< HEAD
 #include <fstream>
 #include <string.h>
 #include "Pixel.h"
-=======
-#include <string.h>
-#include <Pixel.h>
->>>>>>> refs/remotes/origin/master
 
 using namespace std;
 
