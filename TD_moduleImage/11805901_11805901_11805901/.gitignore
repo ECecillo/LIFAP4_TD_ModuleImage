@@ -2,5 +2,7 @@
 obj/*.o
 build*
 bin/exemple/*
-doc/
+doc/html/
+doc/image.doxy.bak
+doc/latex/
 
