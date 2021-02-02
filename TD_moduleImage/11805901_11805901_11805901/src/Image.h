@@ -36,9 +36,37 @@ public:
    // Dessine un rectangle plein de la couleur dans l'image (en utilisant setPix, indices en paramètre compris)
    void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur);
 
-   // Efface l'image en la remplissant de la couleur en paramètre
-   // (en appelant dessinerRectangle avec le bon rectangle)
-   void effacer (const Pixel& couleur);
+   	/**
+	 * @brief
+	 * Efface le contenu de l'image en la remplissant de couleur
+	 * @param
+	 * Couleur
+	 */
+	void effacer(const Pixel& couleur);
+
+    /**
+	 * @brief
+	 * Sauvegarde l'image au format ppm
+	 * @param
+	 * Chemin de la sauvegarde
+	 */
+	void sauver(const std::string & filename) const;
+
+    /**
+	 * @brief
+	 * Ouvrir une image de format ppm
+	 * @param
+	 * Chemin de l'image
+	 */
+	void ouvrir(const std::string & filename);
+
+	/**
+	 * @brief
+	 * Afficher l'image dans la console
+	 * @param
+	 * Rien
+	 */
+	void afficherConsole() const;
 
    // Effectue une série de tests vérifiant que le module fonctionne et
    // que les données membres de l'objet sont conformes
