@@ -1,5 +1,5 @@
 # =========== Nom Exec ===================
-EXEC = bin/example/prog
+EXEC = bin/exemple/prog
 
 # =========== Commande de compil ===========
 CC = g++

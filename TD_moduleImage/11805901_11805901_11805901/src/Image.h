@@ -30,7 +30,7 @@ public:
 
    // Accesseur : récupère le pixel original de coordonnées (x,y) en vérifiant leur validité
    // la formule pour passer d'un tab 2D à un tab 1D est tab[y*dimx+x]
-   Pixel getPix (unsigned int x,unsigned int y);
+   Pixel& getPix (unsigned int x,unsigned int y) const;
 
    // Mutateur : modifie le pixel de coordonnées (x,y)
    void setPix (unsigned int x, unsigned int y, const Pixel& couleur);
@@ -39,7 +39,7 @@ public:
    void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur);
 
 
-   	/**
+	/**
 	 * @brief
 	 * Efface le contenu de l'image en la remplissant de couleur
 	 * @param

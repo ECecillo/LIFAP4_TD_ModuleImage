@@ -26,7 +26,7 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
     tab = new Pixel[dimx*dimy];
 }
 
-Pixel Image::getPix(unsigned int x,unsigned int y) {
+Pixel& Image::getPix(unsigned int x,unsigned int y) const {
     assert(x >= 0 && y >= 0);
     return tab[y*dimx+x];
 }
@@ -112,17 +112,6 @@ void Image::ouvrir(const string & filename)
         }
     fichier.close();
     cout << "Lecture de l'image " << filename << " ... OK\n";
-}
-
-void Image::afficherConsole() const{
-    cout << dimx << " " << dimy << endl;
-    for(unsigned int y=0; y<dimy; ++y) {
-        for(unsigned int x=0; x<dimx; ++x) {
-            Pixel& pix = getPix(x,y);
-            cout << +pix.getRouge() << " " << +pix.getVert() << " " << +pix.getBleu() << " ";
-        }
-        cout << endl;
-    }
 }
 
 void Image::afficherConsole() const{
