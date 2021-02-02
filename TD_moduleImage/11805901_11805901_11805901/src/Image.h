@@ -2,6 +2,7 @@
 #define IMAGE_H
 
 #include <iostream>
+#include <string.h>
 #include <Pixel.h>
 
 using namespace std;
