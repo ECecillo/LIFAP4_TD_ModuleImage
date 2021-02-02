@@ -10,32 +10,37 @@ Pixel::Pixel() {
     b = 0;
 }
 
-Pixel::Pixel(const unsigned int nr,const unsigned int nv,const unsigned int nb) 
+Pixel::Pixel(const unsigned char nr,const unsigned char nv,const unsigned char nb) 
     : r(nr), v(nv), b(nb) {}
 
-int Pixel::getRouge () const {
+unsigned char Pixel::getRouge () const {
     return r;
 }
 
-int Pixel::getVert() const {
+unsigned char Pixel::getVert() const {
     return v;
 }
 
-int Pixel::getBleu () const {
+unsigned char Pixel::getBleu () const {
     return b;    
 }
 
-void Pixel::setRouge (const unsigned int nr) {
+void Pixel::setRouge (const unsigned char nr) {
     assert(nr >= 0 && nr <= 255);
     r = nr;
 }
 
-void Pixel::setVert (const unsigned int nv) {
+void Pixel::setVert (const unsigned char nv) {
     assert(nv >= 0 && nv <= 255);
     v = nv;
 }
 
-void Pixel::setBleu (const unsigned int nb) {
+void Pixel::setBleu (const unsigned char nb) {
     assert(nb >= 0 && nb <= 255);
     b = nb;
+}
+bool Pixel::operator==(const Pixel& other) {
+    return r == other.getRouge() &&
+            v == other.getVert() &&
+            b == other.getBleu();
 }

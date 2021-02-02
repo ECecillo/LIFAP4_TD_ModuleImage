@@ -12,8 +12,14 @@ OBJ_PATH = obj/
 
 # =========== Fichiers ===========
 
-SRC = $(SRC_PATH)mainTest.cpp $(SRC_PATH)Image.cpp $(SRC_PATH)Pixel.cpp 
-OBJ = $(OBJ_PATH)mainTest.o $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o 
+
+# Fichiers .o et .cpp du programme principale
+MAIN_CPP = mainTest.cpp
+MAIN_O = mainTest.o
+
+
+SRC = $(SRC_PATH)$(MAIN_CPP) $(SRC_PATH)Image.cpp $(SRC_PATH)Pixel.cpp 
+OBJ = $(OBJ_PATH)$(MAIN_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o 
 
 	# Module Image
 	IMAGE = $(SRC_PATH)Image.cpp $(SRC_PATH)Image.h
@@ -29,8 +35,8 @@ all: $(EXEC)
 $(EXEC): $(OBJ)
 	$(CC) $(FLAGS) $(OBJ) -o $(EXEC)
 
-$(OBJ_PATH)mainTest.o: $(SRC_PATH)mainTest.cpp $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)mainTest.cpp -o $(OBJ_PATH)mainTest.o
+$(OBJ_PATH)$(MAIN_O): $(SRC_PATH)$(MAIN_CPP) $(IMAGE_H) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN_CPP) -o $(OBJ_PATH)mainTest.o
 
 $(OBJ_PATH)Image.o: $(IMAGE) $(PIXEL_H)
 	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o

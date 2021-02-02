@@ -2,9 +2,14 @@
 #define IMAGE_H
 
 #include <iostream>
+<<<<<<< HEAD
 #include <fstream>
 #include <string.h>
 #include "Pixel.h"
+=======
+#include <string.h>
+#include <Pixel.h>
+>>>>>>> refs/remotes/origin/master
 
 using namespace std;
 
@@ -33,18 +38,20 @@ public:
    Pixel getPix (unsigned int x,unsigned int y);
 
    // Mutateur : modifie le pixel de coordonnées (x,y)
-   void setPix (unsigned int x, unsigned int y, Pixel couleur);
+   void setPix (unsigned int x, unsigned int y, const Pixel& couleur);
 
    // Dessine un rectangle plein de la couleur dans l'image (en utilisant setPix, indices en paramètre compris)
-   void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, Pixel couleur);
+   void dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur);
 
-   /**
+
+   	/**
 	 * @brief
 	 * Efface le contenu de l'image en la remplissant de couleur
 	 * @param
 	 * Couleur
 	 */
 	void effacer(const Pixel& couleur);
+
 
 	/**
 	 * @brief
@@ -54,7 +61,7 @@ public:
 	 */
 	void sauver(const string & filename) const;
 
-	/**
+  /**
 	 * @brief
 	 * Ouvrir une image de format ppm
 	 * @param
