@@ -13,9 +13,9 @@ OBJ_PATH = obj/
 # =========== Fichiers ===========
 
 
-# Fichiers .o et .cpp du programme principale
-MAIN_CPP = mainTest.cpp
-MAIN_O = mainTest.o
+# Fichiers .o et .cpp du programme principale ( 🚫 à changer si on change de fichier cpp à éxécuter 🚫 )
+MAIN_CPP = mainExemple.cpp
+MAIN_O = mainExemple.o
 
 
 SRC = $(SRC_PATH)$(MAIN_CPP) $(SRC_PATH)Image.cpp $(SRC_PATH)Pixel.cpp 
@@ -36,7 +36,7 @@ $(EXEC): $(OBJ)
 	$(CC) $(FLAGS) $(OBJ) -o $(EXEC)
 
 $(OBJ_PATH)$(MAIN_O): $(SRC_PATH)$(MAIN_CPP) $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN_CPP) -o $(OBJ_PATH)mainTest.o
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN_CPP) -o $(OBJ_PATH)$(MAIN_O)
 
 $(OBJ_PATH)Image.o: $(IMAGE) $(PIXEL_H)
 	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o

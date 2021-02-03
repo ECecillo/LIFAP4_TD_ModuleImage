@@ -70,7 +70,6 @@ void Image::effacer(const Pixel& couleur)
 void Image::sauver(const string & filename) 
 {
 	assert(!filename.empty());
-
     ofstream fichier(filename.c_str());
     assert(fichier.is_open());
 
@@ -144,6 +143,7 @@ void Image::testRegression() {
     else {
         cout << "Problème avec les set de Pixel"<< endl;
     }
+    
 
     /* test du constructeur d'Image */
     /* if (dimx == 4 && dimy == 3) {
