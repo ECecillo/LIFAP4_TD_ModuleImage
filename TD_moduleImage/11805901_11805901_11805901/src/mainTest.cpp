@@ -5,7 +5,7 @@
 using namespace std;
 
 int main () {
-    Image im;
+    Image im(200,200);
     im.testRegression();
 
     return 0;

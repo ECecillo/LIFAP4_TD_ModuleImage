@@ -41,8 +41,7 @@ void Image::setPix (unsigned int x,unsigned int y, const Pixel& couleur) {
 }
 
 void Image::dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur) {
-    assert((Xmax > 0 && Ymax > 0) && 
-    (Xmax <= dimx && Ymax <= dimy));
+    assert((Xmax > 0 && Ymax > 0) && (Xmax <= dimx && Ymax <= dimy));
     assert((Xmax >= Xmin && Ymax >= Ymin));
 
     assert(
@@ -147,16 +146,15 @@ void Image::testRegression() {
     }
 
     /* test du constructeur d'Image */
-    Image im(4,3);
-    if (dimx == 4 && dimy == 3) {
+    /* if (dimx == 4 && dimy == 3) {
         cout << "Le constructeur d'Image fonctionne" << endl;
     }
     else {
         cout << "Problème avec le constructeur d'Image" << endl;
-    }
+    } */
 
     /* test de getPix */
-    Pixel p = im.getPix(1,2);
+    Pixel p = getPix(0,0);
     if (p.getRouge() == 0 && p.getVert() == 0 && p.getBleu() == 0) {
         cout << "getPix fonctionne" << endl;
     }
@@ -165,8 +163,8 @@ void Image::testRegression() {
     }
 
     /* test de setPix */
-    im.setPix(1,2,pix);
-    p = im.getPix(1,2);
+    setPix(1,2,pix);
+    p = getPix(1,2);
     if (p.getRouge() == pix.getRouge() && p.getVert() == pix.getVert() && p.getBleu() == pix.getBleu()) {
         cout << "setPix fonctionne" << endl;
     }
@@ -175,14 +173,16 @@ void Image::testRegression() {
     }
 
     /*test de dessinerRectangle */
-    im.dessinerRectangle (0,0,3,2,pix);
+    dessinerRectangle (0,0,3,2,pix);
     bool testPix = true;
-    for (unsigned i = 0; i<4; i++) {
-        for (unsigned j = 0; j<3; j++) {
-            p = im.getPix(i,j);
-            if (p.getRouge() != pix.getRouge() || p.getVert() != pix.getVert() || p.getBleu() == pix.getBleu()) testPix = false;
-        }
-    }
+    for (int i = 0; i <= 3; i++) {
+			for (int j = 0; j <= 2; j++) {
+				if (!(tab[j * dimx + i] == pix))
+				{
+					testPix = false;
+				}
+			}
+		}
     if (testPix) {
         cout << "dessinerRectangle fonctionne" << endl;
     }
@@ -192,12 +192,11 @@ void Image::testRegression() {
 
     /* test de effacer */
     pix.setRouge(0);
-    im.effacer(pix);
+    effacer(pix); // (0, 5, 6) = pix.
     testPix = true;
     for (unsigned i = 0; i<4; i++) {
         for (unsigned j = 0; j<3; j++) {
-            p = im.getPix(i,j);
-            if (p.getRouge() != pix.getRouge() || p.getVert() != pix.getVert() || p.getBleu() == pix.getBleu()) testPix = false;
+            if(!(getPix(i,j) == pix)) testPix = false;
         }
     }
     if (testPix) {
