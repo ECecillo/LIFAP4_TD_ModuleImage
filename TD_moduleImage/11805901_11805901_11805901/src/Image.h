@@ -88,7 +88,7 @@ public:
 	 * @param [in]
 	 * Chemin de la sauvegarde
 	 */
-	void sauver(const string &filename) const;
+	void sauver(const string &filename);
 
 	/**
 	 * @brief
@@ -102,7 +102,7 @@ public:
 	 * @brief
 	 * Afficher l'image dans la console
 	 */
-	void afficherConsole() const;
+	void afficherConsole();
 
 	/// 
 	/// @brief

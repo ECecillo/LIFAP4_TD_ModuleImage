@@ -27,12 +27,12 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
 }
 
 Pixel& Image::getPix(unsigned int x,unsigned int y) const {
-    assert(x >= 0 && y >= 0);
+    assert(x <= dimx && y <= dimy);
     return tab[y*dimx+x];
 }
 
 void Image::setPix (unsigned int x,unsigned int y, const Pixel& couleur) {
-    assert((x >= 0 && y >= 0));
+    assert(x <= dimx && y <= dimy);
     assert((couleur.getRouge() >= 0 && couleur.getRouge() <= 255) &&
     (couleur.getBleu() >= 0 && couleur.getBleu() <= 255) &&
     (couleur.getVert() >= 0 && couleur.getVert() <= 255) );
@@ -41,10 +41,9 @@ void Image::setPix (unsigned int x,unsigned int y, const Pixel& couleur) {
 }
 
 void Image::dessinerRectangle (unsigned int Xmin,unsigned int Ymin,unsigned int Xmax,unsigned int Ymax, const Pixel& couleur) {
-    assert(
-    (Xmin >= 0 && Ymin >= 0) &&
-    (Xmax > 0 && Ymax > 0));
-    assert((Xmax >= Xmin && Ymax > Ymin));
+    assert((Xmax > 0 && Ymax > 0) && 
+    (Xmax <= dimx && Ymax <= dimy));
+    assert((Xmax >= Xmin && Ymax >= Ymin));
 
     assert(
     (couleur.getRouge() >= 0 && couleur.getRouge() <= 255) &&
@@ -69,7 +68,7 @@ void Image::effacer(const Pixel& couleur)
 }
 
 
-void Image::sauver(const string & filename) const 
+void Image::sauver(const string & filename) 
 {
 	assert(!filename.empty());
 
@@ -114,7 +113,7 @@ void Image::ouvrir(const string & filename)
     cout << "Lecture de l'image " << filename << " ... OK\n";
 }
 
-void Image::afficherConsole() const{
+void Image::afficherConsole() {
     cout << dimx << " " << dimy << endl;
     for(unsigned int y=0; y<dimy; ++y) {
         for(unsigned int x=0; x<dimx; ++x) {

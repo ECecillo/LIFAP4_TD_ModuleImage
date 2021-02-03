@@ -26,17 +26,17 @@ unsigned char Pixel::getBleu () const {
 }
 
 void Pixel::setRouge (const unsigned char nr) {
-    assert(nr >= 0 && nr <= 255);
+    assert(nr <= 255);
     r = nr;
 }
 
 void Pixel::setVert (const unsigned char nv) {
-    assert(nv >= 0 && nv <= 255);
+    assert(nv <= 255);
     v = nv;
 }
 
 void Pixel::setBleu (const unsigned char nb) {
-    assert(nb >= 0 && nb <= 255);
+    assert(nb <= 255);
     b = nb;
 }
 bool Pixel::operator==(const Pixel& other) {
