@@ -2,6 +2,7 @@
 void Image::sauver(const string & filename) const {
     ofstream fichier (filename.c_str());
     assert(fichier.is_open());
+    
     fichier << "P3" << endl;
     fichier << dimx << " " << dimy << endl;
     fichier << "255" << endl;
