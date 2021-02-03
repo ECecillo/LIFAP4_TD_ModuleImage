@@ -18,7 +18,8 @@ int main()
 	Fact* f1 = new Fact[MAX];		// En commencant à 0, factoriel des MAX premiers nombres
 	Fact* f2 = new Fact[MAX];		// Factoriel des MAX nombres suivants
 
-	for(i=0;i<=MAX;++i)
+	
+	for(i=0;i<MAX;++i)
 	{
 		f1[i].v = i;
 		f1[i].fact = intFactoriel( f1[i].v );
@@ -26,10 +27,12 @@ int main()
 	}
 	cout << endl;
 
-	for(i=MAX;i<2*MAX;++i)
+	//cout << "Taille f1: " << sizeof(f1) << endl << "Taille f2 : " << sizeof(f2) << endl; 
+	
+	for(i=MAX;i<=2*MAX - 1;++i)
 	{
 		f2[i-MAX].v = i;
-		f2[i-MAX].fact = intFactoriel( f1[i].v );
+		f2[i-MAX].fact = intFactoriel( f2[i-MAX].v );
 		cout << ".";
 	}
 
@@ -39,6 +42,10 @@ int main()
 	for(i=0;i<MAX;++i) cout << f2[i].v << "=" << f2[i].fact << endl;
 
 	delete [] f1;
+	delete [] f2;
+
+	f1 = NULL;
+	f2 = NULL;
 
 	return 0;
 }
