@@ -2,27 +2,40 @@ build*
 *.o
 
 exemples_cours/menu1/prog
-
 exemples_cours/menu2/prog
-
 exemples_cours/menu3/prog
-
 Pacman/.qmake.stash
+
 *.exe
 moc_*
 *.layout
 *.user*
 
 Pacman/bin/pacman_sdl
-
 Pacman/bin/pacman_txt
-
 Pacman/pacman_qt
-
 Pacman/Makefile
 
-exemples_cours/pointeur_f/.vscode/ipch/3683daeaeb26409c/
-
-SDL2_exemple/a.out
+exemples_cours/pointeur_f/.vscode
 
 SDL2_exemple/simple
+
+
+callgrind.out.*
+TD_valgrind/main_ok.cpp
+TD_valgrind/prog
+TD_valgrind/prog_ok
+TD_valgrind_new/
+a.out
+lifap4democours
+TD_moduleImage/SABRI ABID p1711404_p1712103_p1805233_p1708051.tgz
+
+TD_moduleImage/evalModuleImage_old.py
+TD_moduleImage/p17*
+
+TD_moduleImage/eval_archives.csv
+
+Pacman/doc/doxyfile.bak
+Pacman/doc/html
+Pacman/doc/latex
+
