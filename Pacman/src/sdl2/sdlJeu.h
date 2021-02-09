@@ -8,7 +8,7 @@
 
 #include "Jeu.h"
 
-//! \brief Pour gérer une image avec SDL2
+//! \brief Pour gï¿½rer une image avec SDL2
 class Image {
 
 private:
@@ -29,7 +29,7 @@ public:
 
 
 /**
-    La classe gérant le jeu avec un affichage SDL
+    La classe gï¿½rant le jeu avec un affichage SDL
 */
 class sdlJeu {
 

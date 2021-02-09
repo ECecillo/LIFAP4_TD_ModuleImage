@@ -46,7 +46,7 @@ Terrain::Terrain () { // Met dans le tableau 2D terrain les caractères du terra
 			ter[x][y] = terrain1[dimy-1-y][x];
 }
 
-bool Terrain::estPositionPersoValide (const int x, const int y) const {
+bool Terrain::estPositionPersoValide (const int x, const int y) const { // Check si les persos sont bien dans le terrain du jeu et pas dans un mur ou en dehors des dim terrain.
 	return ((x>=0) && (x<dimx) && (y>=0) && (y<dimy) && (ter[x][y]!='#'));
 }
 
