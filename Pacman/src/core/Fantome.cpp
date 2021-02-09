@@ -1,5 +1,8 @@
 #include "Fantome.h"
 #include <stdlib.h>
+#include <iostream>
+
+using namespace std;
 
 Fantome::Fantome () {
 	x = y = 10;
@@ -45,6 +48,7 @@ void Fantome::bougeAuto (const Terrain & t) {
     int xtmp,ytmp;
     xtmp = x + dx[dir];
     ytmp = y + dy[dir];
+    //cout << "xtmp : " << xtmp << " |  ytmp : " << ytmp << endl;
     if (t.estPositionPersoValide(xtmp,ytmp)) {
         x = xtmp;
         y = ytmp;

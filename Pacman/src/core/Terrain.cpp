@@ -1,7 +1,7 @@
 #include "Terrain.h"
 #include <cassert>
 
-const char terrain1[15][21] = {
+const char terrain1[15][21] = { // On prend ce terrain en référence de caractère et on l'affichage dans le sens inverse.
  "####################",
  "#.###....##........#",
  "#.#####..##...####.#",
@@ -38,7 +38,7 @@ const char terrain2[15][21] = {
 };
 
 
-Terrain::Terrain () {
+Terrain::Terrain () { // Met dans le tableau 2D terrain les caractères du terrain déclarré ci-dessus.
 	dimx = 20;
 	dimy = 15;
 	for(int x=0;x<dimx;++x)
