@@ -1,25 +1,35 @@
 #include "Calcul.h"
 #include <assert.h>
+#include <iostream>
 
-int intAdd (const int a, const int b)
+using namespace std;
+
+int intAdd(const int a, const int b)
 {
 	return a+b;
+
 }
 
-int intMul (const int a, const int b)
+int intMul(const int a, const int b)
 {
 	return a*b;
 }
 
-int intDiv (const int a, const int b)
+int intDiv(const int a, const int b)
 {
-	assert( b!=0 );
-	return ((int)(a/b));
+	assert(b != 0);
+	return ((int)(a / b));
 }
 
-int intFactoriel (const int n)
+int intFactoriel(const int n)
 {
-	if (n<=0) return 0;
-	else if (n==1) return 1;
-	else return intMul(n,intFactoriel(intAdd(n,-1)));
+	if (n == 0) {
+		return 0;
+	}
+	else if (n == 1) {
+		return 1;
+	}
+	else {
+		return intMul(n, intFactoriel(intAdd(n, -1)));
+	}
 }
