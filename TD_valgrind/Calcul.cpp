@@ -3,24 +3,12 @@
 
 int intAdd (const int a, const int b)
 {
-	int i;
-	int r;
-	r = a;
-	if (b>=0)
-		for(i=0;i<b;++i) ++r;
-	else
-		for(i=0;i<-b;++i) --r;
-	return r;
+	return a+b;
 }
 
 int intMul (const int a, const int b)
 {
-	int i;
-	int r;
-	r = 0;
-	for(i=0;i<b;++i)
-		r = intAdd(r,a);
-	return r;
+	return a*b;
 }
 
 int intDiv (const int a, const int b)
