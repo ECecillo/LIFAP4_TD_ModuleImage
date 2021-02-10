@@ -26,13 +26,6 @@ private:
 	SDL_Texture *texture;
 	bool has_changed;
 
-	// Fenêtre SDL
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-
-	bool souris;
-	bool touche;
-
 public:
 	/**
 	 * @brief Construit une nouvelle image et construit une Fenêtre SDL.
@@ -170,27 +163,6 @@ public:
 	 * @param surf 
 	 */
 	void setSurface(SDL_Surface *surf);
-
-	
-	// ============ Fonctions pour la fenêtre SDL ========
-	/**
-	 * @brief 
-	 * Gère les interactions avec l'utilisateur, appelle la fonction Affiche tant qu'on a pas fermé la fenêtre.
-	 */
-	void sdlBoucle();
-	
-	/**
-	 * @brief 
-	 * Appel les fonctions qui permettent d'afficher les images dans la fenêtre SDL.
-	 */
-	void sdlAff();
-
-	///
-	/// @brief
-	/// Effectue une série de tests vérifiant que le module fonctionne et
-	/// que les données membres de l'objet sont conformes
-	///
-	void testRegression();
 };
 
 #endif
