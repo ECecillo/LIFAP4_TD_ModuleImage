@@ -18,8 +18,10 @@ OBJ_PATH = obj/
 # Fichiers .o et .cpp du programme principal
 MAIN1_CPP = mainExemple.cpp
 MAIN1_O = mainExemple.o
+
 MAIN2_CPP = mainTest.cpp
 MAIN2_O = mainTest.o
+
 MAIN3_CPP = mainAffichage.cpp
 MAIN3_O = mainAffichage.o
 

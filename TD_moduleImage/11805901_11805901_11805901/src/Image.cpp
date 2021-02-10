@@ -10,6 +10,9 @@ using namespace std;
 Image::Image () {
     tab = NULL;
     dimy = dimx = 0;
+    surface = NULL;
+    texture = NULL;
+    has_changed = false;
 }
 
 Image::~Image () {
