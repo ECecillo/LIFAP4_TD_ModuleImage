@@ -1,5 +1,7 @@
 # =========== Nom Exec ===================
-EXEC = bin/exemple/prog
+EXEC1 = bin/exemple
+EXEC2 = bin/test
+EXEC3 = bin/affichage
 
 # =========== Commande de compil ===========
 CC = g++
@@ -13,13 +15,19 @@ OBJ_PATH = obj/
 # =========== Fichiers ===========
 
 
-# Fichiers .o et .cpp du programme principale ( 🚫 à changer si on change de fichier cpp à éxécuter 🚫 )
-MAIN_CPP = mainExemple.cpp
-MAIN_O = mainExemple.o
+# Fichiers .o et .cpp du programme principal
+MAIN1_CPP = mainExemple.cpp
+MAIN1_O = mainExemple.o
+MAIN2_CPP = mainTest.cpp
+MAIN2_O = mainTest.o
+MAIN3_CPP = mainAffichage.cpp
+MAIN3_O = mainAffichage.o
 
 
 SRC = $(SRC_PATH)$(MAIN_CPP) $(SRC_PATH)Image.cpp $(SRC_PATH)Pixel.cpp 
-OBJ = $(OBJ_PATH)$(MAIN_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o 
+OBJ1 = $(OBJ_PATH)$(MAIN1_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o
+OBJ2 = $(OBJ_PATH)$(MAIN2_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o
+OBJ3 = $(OBJ_PATH)$(MAIN3_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o
 
 	# Module Image
 	IMAGE = $(SRC_PATH)Image.cpp $(SRC_PATH)Image.h
@@ -30,13 +38,25 @@ OBJ = $(OBJ_PATH)$(MAIN_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o
 
 # ====================== Makefile ======================
 
-all: $(EXEC)
+all: $(EXEC1) $(EXEC2) $(EXEC3)
 
-$(EXEC): $(OBJ)
-	$(CC) $(FLAGS) $(OBJ) -o $(EXEC)
+$(EXEC1): $(OBJ1)
+	$(CC) $(FLAGS) $(OBJ1) -o $(EXEC1)
 
-$(OBJ_PATH)$(MAIN_O): $(SRC_PATH)$(MAIN_CPP) $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN_CPP) -o $(OBJ_PATH)$(MAIN_O)
+$(EXEC2): $(OBJ2)
+	$(CC) $(FLAGS) $(OBJ2) -o $(EXEC2)
+
+$(EXEC3): $(OBJ3)
+	$(CC) $(FLAGS) $(OBJ3) -o $(EXEC1)
+
+$(OBJ_PATH)$(MAIN1_O): $(SRC_PATH)$(MAIN1_CPP) $(IMAGE_H) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN1_CPP) -o $(OBJ_PATH)$(MAIN1_O)
+
+$(OBJ_PATH)$(MAIN2_O): $(SRC_PATH)$(MAIN2_CPP) $(IMAGE_H) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN2_CPP) -o $(OBJ_PATH)$(MAIN2_O)
+
+$(OBJ_PATH)$(MAIN3_O): $(SRC_PATH)$(MAIN3_CPP) $(IMAGE_H) $(PIXEL_H)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN3_CPP) -o $(OBJ_PATH)$(MAIN3_O)
 
 $(OBJ_PATH)Image.o: $(IMAGE) $(PIXEL_H)
 	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o
@@ -48,4 +68,4 @@ clean:
 	rm -f $(OBJ_PATH)*.o *.out
 
 veryclean: 
-	rm -f $(EXEC) $(OBJ_PATH)*.o
+	rm -f $(EXEC1) $(EXEC2) $(EXEC3) $(OBJ_PATH)*.o
