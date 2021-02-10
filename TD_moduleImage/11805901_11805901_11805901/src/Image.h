@@ -122,6 +122,14 @@ public:
 	///
 	void afficher();
 
+
+	///
+    /// @brief
+    /// Effectue une série de tests vérifiant que le module fonctionne et
+    /// que les données membres de l'objet sont conformes
+    ///
+    void testRegression();
+	
 	// ============ Fonctions pour charger/afficher Image ========
 	/**
 	 * @brief 

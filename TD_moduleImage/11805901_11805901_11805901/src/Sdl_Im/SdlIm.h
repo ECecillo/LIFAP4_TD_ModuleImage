@@ -32,11 +32,6 @@ public:
 	 */
     void sdlAff();
 
-    ///
-    /// @brief
-    /// Effectue une série de tests vérifiant que le module fonctionne et
-    /// que les données membres de l'objet sont conformes
-    ///
-    void testRegression();
+    
 };
 #endif
