@@ -1,7 +1,7 @@
 # =========== Nom Exec ===================
-EXEC1 = bin/exemple/mainExemple
-EXEC2 = bin/test/mainTest
-EXEC3 = bin/affichage/mainAffichage
+EXEC1 = bin/exemple
+EXEC2 = bin/test
+EXEC3 = bin/affichage
 
 # =========== Commande de compil ===========
 CC = g++
@@ -38,43 +38,33 @@ OBJ3 = $(OBJ_PATH)$(MAIN3_O) $(OBJ_PATH)Image.o $(OBJ_PATH)Pixel.o
 	PIXEL = $(SRC_PATH)Pixel.h $(SRC_PATH)Pixel.cpp
 	PIXEL_H = $(SRC_PATH)Pixel.h
 
-# =================== SDL =========================
-
-INCLUDE_DIR_SDL = -I/usr/include/SDL2
-LIBS_SDL = -lSDL2 -lSDL2_image
-
 # ====================== Makefile ======================
 
 all: $(EXEC1) $(EXEC2) $(EXEC3)
 
 $(EXEC1): $(OBJ1)
-	$(CC) $(FLAGS) $(OBJ1) -o $(EXEC1) ${LIBS_SDL}
+	$(CC) $(FLAGS) $(OBJ1) -o $(EXEC1)
 
 $(EXEC2): $(OBJ2)
-	$(CC) $(FLAGS) $(OBJ2) -o $(EXEC2) ${LIBS_SDL}
+	$(CC) $(FLAGS) $(OBJ2) -o $(EXEC2)
 
 $(EXEC3): $(OBJ3)
-	$(CC) $(FLAGS) $(OBJ3) -o $(EXEC1) ${LIBS_SDL}
+	$(CC) $(FLAGS) $(OBJ3) -o $(EXEC1)
 
 $(OBJ_PATH)$(MAIN1_O): $(SRC_PATH)$(MAIN1_CPP) $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN1_CPP) -o $(OBJ_PATH)$(MAIN1_O) $(LDFLAGS) $(INCLUDE_DIR_SDL)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN1_CPP) -o $(OBJ_PATH)$(MAIN1_O)
 
 $(OBJ_PATH)$(MAIN2_O): $(SRC_PATH)$(MAIN2_CPP) $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN2_CPP) -o $(OBJ_PATH)$(MAIN2_O) $(LDFLAGS) $(INCLUDE_DIR_SDL)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN2_CPP) -o $(OBJ_PATH)$(MAIN2_O)
 
 $(OBJ_PATH)$(MAIN3_O): $(SRC_PATH)$(MAIN3_CPP) $(IMAGE_H) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN3_CPP) -o $(OBJ_PATH)$(MAIN3_O) $(LDFLAGS) $(INCLUDE_DIR_SDL)
+	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN3_CPP) -o $(OBJ_PATH)$(MAIN3_O)
 
 $(OBJ_PATH)Image.o: $(IMAGE) $(PIXEL_H)
-	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o $(LDFLAGS) $(INCLUDE_DIR_SDL)
+	$(CC) $(FLAGS) -c $(SRC_PATH)Image.cpp -o $(OBJ_PATH)Image.o
 
 $(OBJ_PATH)Pixel.o: $(PIXEL)
 	$(CC) $(FLAGS) -c $(SRC_PATH)Pixel.cpp -o $(OBJ_PATH)Pixel.o
-
-
-
-# ============================ Cleaner =============================
-
 
 clean:
 	rm -f $(OBJ_PATH)*.o *.out
