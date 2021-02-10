@@ -19,6 +19,18 @@ private:
     bool touche;
 
 public:
+
+    /**
+     * @brief Construct a new Sdl Im object
+     * 
+     */
+    SdlIm();
+
+    /**
+     * @brief Destroy the Sdl Im object
+     * 
+     */
+    ~SdlIm();
     // ============ Fonctions pour la fenêtre SDL ========
     /**
 	 * @brief 
@@ -31,12 +43,5 @@ public:
 	 * Appel les fonctions qui permettent d'afficher les images dans la fenêtre SDL.
 	 */
     void sdlAff();
-
-    ///
-    /// @brief
-    /// Effectue une série de tests vérifiant que le module fonctionne et
-    /// que les données membres de l'objet sont conformes
-    ///
-    void testRegression();
 };
 #endif
