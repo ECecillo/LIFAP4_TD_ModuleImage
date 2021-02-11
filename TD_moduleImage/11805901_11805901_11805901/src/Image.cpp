@@ -10,7 +10,7 @@ Image::Image()
 {
     tab = NULL;
     dimy = dimx = 0;
-    zoomLevel = 5;
+    zoomLevel = 50;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -36,7 +36,7 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
     assert(dimensionX > 0 && dimensionY > 0);
     dimx = dimensionX;
     dimy = dimensionY;
-    zoomLevel = 0;
+    zoomLevel = 5;
     tab = new Pixel[dimx * dimy];
     // Construction de la SDL.
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -54,7 +54,7 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
         exit(1);
     }
     // Creation de la fenetre
-    window = SDL_CreateWindow("Module_Image", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, dimx, dimy, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("Module_Image", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL)
     {
         cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << endl;
@@ -198,17 +198,17 @@ void Image::affInit()
     SDL_Rect r;
     r.x = 0;
     r.y = 0;
-    r.w = dimx + zoomLevel * 10;
-    r.h = dimy + zoomLevel * 10;
+    r.w = dimx + zoomLevel ;
+    r.h = dimy + zoomLevel ;
 
     if (r.w < (unsigned int)dimx)
         r.w = dimx;
     if (r.h < (unsigned int)dimy)
         r.h = dimy;
     if (r.w > WIDTH)
-        r.w = WIDTH - 5;
+        r.w = WIDTH;
     if (r.h > HEIGHT)
-        r.h = HEIGHT - 5;
+        r.h = HEIGHT;
 
     r.x = (r.x - r.w / 2) + WIDTH / 2;
     r.y = (r.y - r.h / 2) + HEIGHT / 2;
@@ -252,7 +252,7 @@ void Image::affBoucle()
                 {
                 case SDL_SCANCODE_T: // On Zoom
                     // https://wiki.libsdl.org/SDL_RenderCopy
-                    if(zoomLevel >= 20) zoomLevel = 20;
+                    if(zoomLevel >= HEIGHT) zoomLevel = HEIGHT;
                     zoomLevel ++;
                     cout << zoomLevel << endl;
                     break;
