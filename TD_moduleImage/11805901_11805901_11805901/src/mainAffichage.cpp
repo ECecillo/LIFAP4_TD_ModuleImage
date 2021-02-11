@@ -2,7 +2,7 @@
  
 int main (int argc, char** argv) {
  
-   Image image (400,400);
+   Image image (10,10);
  
    Pixel bleu (21, 104, 219);
    Pixel orange (242, 174, 38);
