@@ -2,7 +2,7 @@
  
 int main (int argc, char** argv) {
  
-   Image image (10,10);
+   Image image (400,400);
  
    Pixel bleu (21, 104, 219);
    Pixel orange (242, 174, 38);
@@ -16,7 +16,7 @@ int main (int argc, char** argv) {
    image.setPix(8,6,orange);
    image.setPix(2,4,gris);
  
-   //image.afficher();
+   image.afficher();
  
    return 0;
 }

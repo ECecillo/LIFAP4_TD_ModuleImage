@@ -10,7 +10,14 @@ Image::Image()
 {
     tab = NULL;
     dimy = dimx = 0;
+    zoomLevel = 5;
 
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        cout << "Erreur lors de l'initialisation de la SDL : " << SDL_GetError() << endl;
+        SDL_Quit();
+        exit(1);
+    }
     surface = NULL;
     texture = NULL;
     has_changed = false;
@@ -20,6 +27,7 @@ Image::~Image()
 {
     delete[] tab;
     tab = NULL;
+    zoomLevel = 5;
     dimy = dimx = 0;
 }
 
@@ -28,6 +36,7 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
     assert(dimensionX > 0 && dimensionY > 0);
     dimx = dimensionX;
     dimy = dimensionY;
+    zoomLevel = 0;
     tab = new Pixel[dimx * dimy];
     // Construction de la SDL.
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -54,6 +63,7 @@ Image::Image(const unsigned int dimensionX, const unsigned int dimensionY)
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, dimx, dimy);
 }
 
 Pixel &Image::getPix(unsigned int x, unsigned int y) const
@@ -89,7 +99,6 @@ void Image::dessinerRectangle(unsigned int Xmin, unsigned int Ymin, unsigned int
             setPix(i, j, couleur);
         }
     }
-
 }
 
 void Image::effacer(const Pixel &couleur)
@@ -111,9 +120,10 @@ void Image::sauver(const string &filename) const
     fichier << "P3" << endl;
     fichier << dimx << " " << dimy << endl;
     fichier << "255" << endl;
-    for(unsigned int y=0; y<dimy; ++y)
-        for(unsigned int x=0; x<dimx; ++x) {
-            Pixel& pix = getPix(x, y);
+    for (unsigned int y = 0; y < dimy; ++y)
+        for (unsigned int x = 0; x < dimx; ++x)
+        {
+            Pixel &pix = getPix(x, y);
             fichier << +pix.getRouge() << " " << +pix.getVert() << " " << +pix.getBleu() << " ";
         }
     cout << "Sauvegarde de l'image " << filename << " ... OK\n";
@@ -161,32 +171,58 @@ void Image::afficherConsole()
         cout << endl;
     }
 }
-
-void Image::afficher()
+void Image::affInit()
 {
-    //Remplir l'�cran de blanc
+    //Remplir l'écran de blanc
     SDL_SetRenderDrawColor(renderer, 211, 211, 211, 255); // Fond gris clair.
     SDL_RenderClear(renderer);
-    /* 
-	int x,y;
-	const Terrain& ter = jeu.getConstTerrain();
-	const Pacman& pac = jeu.getConstPacman();
-	const Fantome& fan = jeu.getConstFantome();
- 
-     // Afficher les sprites des murs et des pastilles
-	for (x=0;x<ter.getDimX();++x)
-		for (y=0;y<ter.getDimY();++y)
-			if (ter.getXY(x,y)=='#')
-				im_mur.draw(renderer,x*TAILLE_SPRITE,y*TAILLE_SPRITE,TAILLE_SPRITE,TAILLE_SPRITE);
-			else if (ter.getXY(x,y)=='.')
-				im_pastille.draw(renderer,x*TAILLE_SPRITE,y*TAILLE_SPRITE,TAILLE_SPRITE,TAILLE_SPRITE);
-    
- */
 
-    // Afficher le sprite de l'image
-    //im_fantome.draw(renderer,fan.getX()*TAILLE_SPRITE,fan.getY()*TAILLE_SPRITE,TAILLE_SPRITE,TAILLE_SPRITE);
+    if (SDL_SetRenderTarget(renderer, texture) != 0)
+    {
+        cout << "Erreur SDL_SetRenderTarget : " << SDL_GetError() << endl;
+        exit(1);
+    }
+
+    // On affiche les pixels ligne par ligne (haut en bas)
+    for (unsigned int i = 0; i < dimx; ++i)
+    {
+        for (unsigned int j = 0; j < dimy; ++j)
+        {
+            const Pixel p = tab[j * dimx + i];
+            SDL_SetRenderDrawColor(renderer, p.getRouge(), p.getVert(), p.getBleu(), 255);
+            SDL_RenderDrawPoint(renderer, i, j);
+        }
+    }
+    SDL_SetRenderTarget(renderer, NULL);
+
+    SDL_Rect r;
+    r.x = 0;
+    r.y = 0;
+    r.w = dimx + zoomLevel * 10;
+    r.h = dimy + zoomLevel * 10;
+
+    if (r.w < (unsigned int)dimx)
+        r.w = dimx;
+    if (r.h < (unsigned int)dimy)
+        r.h = dimy;
+    if (r.w > WIDTH)
+        r.w = WIDTH - 5;
+    if (r.h > HEIGHT)
+        r.h = HEIGHT - 5;
+
+    r.x = (r.x - r.w / 2) + WIDTH / 2;
+    r.y = (r.y - r.h / 2) + HEIGHT / 2;
+    SDL_RenderCopy(renderer, texture, NULL, &r);
+
+    SDL_RenderPresent(renderer);
 }
-/* void Image::affBoucle()
+/* void Image::ZoomIn() {
+
+}
+void Image::ZoomOut() {
+
+} */
+void Image::affBoucle()
 {
     SDL_Event events;
     bool quit = false;
@@ -216,11 +252,16 @@ void Image::afficher()
                 {
                 case SDL_SCANCODE_T: // On Zoom
                     // https://wiki.libsdl.org/SDL_RenderCopy
+                    if(zoomLevel >= 20) zoomLevel = 20;
+                    zoomLevel ++;
+                    cout << zoomLevel << endl;
                     break;
                 case SDL_SCANCODE_G: // On Dézoom
-
+                    if(zoomLevel <= 0) zoomLevel = 0;
+                    zoomLevel --;
                     break;
                 case SDL_SCANCODE_ESCAPE:
+                    affDetruit();
                     quit = true;
                     break;
                 default:
@@ -229,19 +270,24 @@ void Image::afficher()
             }
 
             // on affiche le jeu sur le buffer cach�
-            afficher();
+            affInit();
 
             // on permute les deux buffers (cette fonction ne doit se faire qu'une seule fois dans la boucle)
             SDL_RenderPresent(renderer);
         }
     }
-} */
+}
 
 void Image::affDetruit()
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+void Image::afficher()
+{
+    affBoucle();
 }
 
 void Image::testRegression()
