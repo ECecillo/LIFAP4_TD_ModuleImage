@@ -9,6 +9,8 @@
 #include <SDL_image.h>
 
 using namespace std;
+const unsigned int WIDTH = 200, HEIGHT = 200;
+
 
 /**
  * @brief 
@@ -27,15 +29,43 @@ private:
 	bool has_changed;
 
 	// Fenêtre SDL
+	unsigned int zoomLevel;
     SDL_Window *window;
     SDL_Renderer *renderer;
 
     bool souris;
     bool touche;
 
+	/**
+	 * @brief 
+	 * Intitialise la fenêtre SDL.
+	 */
 	void affInit();
+
+	/**
+	 * @brief 
+	 * Boucle d'événements pour la fenêtre SDL.
+	 */
 	void affBoucle();
+
+	/**
+	 * @brief 
+	 * Détruit toute les instances de la fenêtre SDL.
+	 */
 	void affDetruit();
+
+	/**
+	 * @brief 
+	 * Procédure qui permet de Zoomer dans la fenêtre SDL.
+	 */
+	void ZoomIn();
+
+	/**
+	 * 
+	 * @brief 
+	 * Procédure qui permet de Dézoomer dans la fenêtre SDL.
+	 */
+	void ZoomOut();
 
 public:
 	/**
@@ -174,39 +204,6 @@ public:
 	 * @param surf 
 	 */
 	void setSurface(SDL_Surface *surf);
-};
-
-class SdlIm
-{
-private:
-    
-
-public:
-
-	/**
-	 * @brief Construct a new Sdl Im object
-	 * 
-	 */
-	SdlIm ();
-	/**
-	 * @brief Destroy the Sdl Im object
-	 * 
-	 */
-    ~SdlIm ();
-
-    // ============ Fonctions pour la fenêtre SDL ========
-    /**
-	 * @brief 
-	 * Gère les interactions avec l'utilisateur, appelle la fonction Affiche tant qu'on a pas fermé la fenêtre.
-	 */
-    void sdlBoucle();
-
-    /**
-	 * @brief 
-	 * Appel les fonctions qui permettent d'afficher les images dans la fenêtre SDL.
-	 */
-    void sdlAff();
-    
 };
 
 #endif
