@@ -51,7 +51,7 @@ $(EXEC2): $(OBJ2)
 	$(CC) $(FLAGS) $(OBJ2) -o $(EXEC2) $(LIBS_SDL)
 
 $(EXEC3): $(OBJ3)
-	$(CC) $(FLAGS) $(OBJ3) -o $(EXEC1) $(LIBS_SDL)
+	$(CC) $(FLAGS) $(OBJ3) -o $(EXEC3) $(LIBS_SDL)
 
 $(OBJ_PATH)$(MAIN1_O): $(SRC_PATH)$(MAIN1_CPP) $(IMAGE_H) $(PIXEL_H)
 	$(CC) $(FLAGS) -c $(SRC_PATH)$(MAIN1_CPP) -o $(OBJ_PATH)$(MAIN1_O) $(INCLUDE_DIR_SDL)

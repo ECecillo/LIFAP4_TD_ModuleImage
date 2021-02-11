@@ -26,6 +26,17 @@ private:
 	SDL_Texture *texture;
 	bool has_changed;
 
+	// Fenêtre SDL
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+
+    bool souris;
+    bool touche;
+
+	void affInit();
+	void affBoucle();
+	void affDetruit();
+
 public:
 	/**
 	 * @brief Construit une nouvelle image et construit une Fenêtre SDL.
@@ -100,7 +111,7 @@ public:
 	 * @param [in]
 	 * Chemin de la sauvegarde
 	 */
-	void sauver(const string &filename);
+	void sauver(const string &filename) const;
 
 	/**
 	 * @brief
@@ -129,16 +140,8 @@ public:
     /// que les données membres de l'objet sont conformes
     ///
     void testRegression();
-	
-	// ============ Fonctions pour charger/afficher Image ========
-	/**
-	 * @brief 
-	 * Charge L'image que l'on passe en paramètre.
-	 * @param filename : Nom du fichier à ouvrir peut être de n'importe qu'elle format du moment qu'on précise ce dernier.
-	 * @param renderer : Structure qui s'occupe de toute le rendu. Lié à SDL_Window qui est une structure où l'on a ttes les infos de la fenêtre SDL.
-	 */
-	void loadFromFile(const char *filename, SDL_Renderer *renderer);
 
+	// ============ Fonctions pour charger/afficher Image ========
 	/**
 	 * @brief 
 	 * 
@@ -171,6 +174,39 @@ public:
 	 * @param surf 
 	 */
 	void setSurface(SDL_Surface *surf);
+};
+
+class SdlIm
+{
+private:
+    
+
+public:
+
+	/**
+	 * @brief Construct a new Sdl Im object
+	 * 
+	 */
+	SdlIm ();
+	/**
+	 * @brief Destroy the Sdl Im object
+	 * 
+	 */
+    ~SdlIm ();
+
+    // ============ Fonctions pour la fenêtre SDL ========
+    /**
+	 * @brief 
+	 * Gère les interactions avec l'utilisateur, appelle la fonction Affiche tant qu'on a pas fermé la fenêtre.
+	 */
+    void sdlBoucle();
+
+    /**
+	 * @brief 
+	 * Appel les fonctions qui permettent d'afficher les images dans la fenêtre SDL.
+	 */
+    void sdlAff();
+    
 };
 
 #endif
